@@ -8,4 +8,4 @@ Tror det skal gå an å bruke vanilla på dette viset, ærlig talt.
 - Petter
 
 
-Edit test #2
+Edit test #2, og #3
