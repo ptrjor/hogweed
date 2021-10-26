@@ -6,3 +6,6 @@ spillet som ligger inne nå, til å fungere mer som vårt spill eller såklart b
 Tror det skal gå an å bruke vanilla på dette viset, ærlig talt.
 
 - Petter
+
+
+Edit test #2
