@@ -1,0 +1,14 @@
+canvas {
+    align-self: center;
+    border:1px solid #d3d3d3;
+    background-color: lightgray;
+    /* background-image: url(https://img.itch.zone/aW1hZ2UvNzczNzQvMzYxOTcwLnBuZw==/original/xdyh04.png); */
+
+}
+
+button
+{
+    width: 20%;
+    height: 10%;
+    background-color: mediumslateblue;
+}
