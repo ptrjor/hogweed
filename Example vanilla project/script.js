@@ -1,10 +1,12 @@
 var myGamePiece;
 var myObstacles = [];
 var myScore;
+var button1Held = false;
+const gravity = 0.1;
 
 function startGame() {
-    myGamePiece = new component(30, 30, "blue", 10, 540);
-    myGamePiece.gravity = 0.05;
+    myGamePiece = new component(60, 30, "blue", 10, 540);
+    // myGamePiece.gravity = 0.05; // let g be global constant
     myScore = new component("30px", "Consolas", "black", 40, 40, "text");
     myGameArea.start();
 }
@@ -34,8 +36,6 @@ function component(width, height, color, x, y, type) {
     this.speedY = 0;    
     this.x = x;
     this.y = y;
-    this.gravity = 0;
-    this.gravitySpeed = 0;
     this.update = function() {
         ctx = myGameArea.context;
         if (this.type == "text") {
@@ -48,18 +48,34 @@ function component(width, height, color, x, y, type) {
         }
     }
     this.newPos = function() {
-        this.gravitySpeed += this.gravity;
         this.x += this.speedX;
-        this.y += this.speedY + this.gravitySpeed;
-        this.hitBottom();
+        this.y += this.speedY // + this.gravitySpeed;
+        this.applyGravity();
     }
-    this.hitBottom = function() {
+    this.onGround = function() {
+	// return true if this is on the ground
         var rockbottom = myGameArea.canvas.height - this.height;
-        if (this.y > rockbottom) {
-            this.y = rockbottom;
-            this.gravitySpeed = 0;
-        }
+        if (this.y >= rockbottom) {
+	    return true;
+	}
+	else {
+	    return false;
+	}
     }
+
+    this.applyGravity = function() {
+        if (this.onGround()) {
+	    this.y = myGameArea.canvas.height - this.height;
+	    this.speedY = 0;
+        }
+	else { // piece is in the air, apply gravity
+	    if (this.y < 1) { // make sure we don't leave screen at top
+		this.y = 1;
+	    }
+	    accelY(-gravity);
+	}
+    }
+
     this.crashWith = function(otherobj) {
         var myleft = this.x;
         var myright = this.x + (this.width);
@@ -86,25 +102,42 @@ function updateGameArea() {
     }
     myGameArea.clear();
     myGameArea.frameNo += 1;
-    if (myGameArea.frameNo == 1 || everyinterval(150)) {
-        x = myGameArea.canvas.width;
-        minHeight = 20;
-        maxHeight = 200;
+    if (myGameArea.frameNo == 1 || everyinterval(250)) {
+        minHeight = 10;
+        maxHeight = 75;
+        minWidth = 10;
+        maxWidth = 75;
         height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
-        minGap = 50;
-        maxGap = 200;
-        gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
-        myObstacles.push(new component(10, height, "green", x, 0));
-        myObstacles.push(new component(10, x - height - gap, "green", x, height + gap));
+        width = Math.floor(Math.random()*(maxWidth-minWidth+1)+minWidth);
+        x = myGameArea.canvas.width;
+	y = myGameArea.canvas.height - height;
+        // minGap = 50;
+        // maxGap = 200;
+        // gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
+        // myObstacles.push(new component(10, height, "green", x, 0));
+        myObstacles.push(new component(width, height, "green", x, y));
     }
     for (i = 0; i < myObstacles.length; i += 1) {
-        myObstacles[i].x += -1;
+        myObstacles[i].x += -2;
         myObstacles[i].update();
     }
     myScore.text="SCORE: " + myGameArea.frameNo;
     myScore.update();
     myGamePiece.newPos();
     myGamePiece.update();
+    // check button status after update
+    if (button1Held & myGamePiece.onGround()) {
+	console.log("button 1 is held!")
+	myGamePiece.speedX = 1;
+    }
+    else if (myGamePiece.onGround()) {
+	if (myGamePiece.x > 10) {
+	    myGamePiece.speedX = -1;
+	}
+	else {
+	    myGamePiece.speedX = 0;
+	}
+    }
 }
 
 function everyinterval(n) {
@@ -112,6 +145,33 @@ function everyinterval(n) {
     return false;
 }
 
-function accelerate(n) {
-    myGamePiece.gravity = n;
+function butDown() {
+    console.log("Pressed button 1");
+    button1Held = true;
 }
+
+function butUp() {
+    console.log("Released button 1");
+    button1Held = false;
+    if (myGamePiece.onGround()) {
+	console.log("Jump!");
+	accelY(5);
+    }
+}
+
+function accelY(n) {
+    myGamePiece.speedY -= n;
+}
+
+document.addEventListener('keydown', (event) => {
+    if (event.code == "Space") {
+	butDown();
+    }
+}, false);
+
+document.addEventListener('keyup', (event) => {
+    if (event.code == "Space") {
+	butUp();
+    }
+}, false);
+

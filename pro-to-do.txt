@@ -1,0 +1,25 @@
+Bare noen strøtanker rundt oppgaver vi kan trenge å utføre.
+
+=== Viktige oppgaver ===
+
+* Legge til spilleravatarer (to små firkanter oppå den store)
+
+* La Daxtrot hoppe når begge spillerne slipper knappen samtidig
+
+* Individuell hopping når bare en spiller slipper knappen
+
+* Styre Daxtrot sin speedX ved å registrere knappstatus? (teste ut)
+  -> if Daxtrot i lufta: behold speedX samme hva
+  -> else if ingen holder knapp: speedX = 0
+  -> else if en spiller holder knapp: speedX = -5
+  -> else if begge holder knapp: speedX = 5
+
+* Størrelse på viewport:
+  -> bruk mer av skjermen (vi vil også ha større sprites)
+  -> dynamisk størrelse for mobile enheter osv.
+
+=== Kosmetisk ===
+
+* Spill av liten lyd når vi hopper, kræsjer osv.?
+
+* Sprites og animasjoner
