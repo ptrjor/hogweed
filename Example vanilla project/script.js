@@ -9,11 +9,13 @@ var p2key = "KeyP";
 var type;
 const gravity = 0.1;
 var onhound = false;
+var p1onhound = false;
+var p2onhound = false;
 
 function startGame() {
-    daxtrot = new component(80, 50, "blue", 10, 460, "daxtrot");
-    player1 = new component(30, 20, "red", 10, 420, "player");  //
-    player2 = new component(30, 20, "green", 60, 420, "player");
+    daxtrot = new component(160, 100, "blue", 10, 460, "daxtrot");
+    player1 = new component(60, 40, "red", 10, 420, "player");  //
+    player2 = new component(60, 40, "green", 110, 420, "player");
     myScore = new component("30px", "Consolas", "black", 40, 40, "text");
     myGameArea.start();
 }
@@ -21,9 +23,9 @@ function startGame() {
 var myGameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
-        this.canvas.width = 960;
-        this.canvas.height = 540;
-        this.canvas.style = "position:absolute; left: 50%; top: 40%; width: 400px; margin-left: -200px;";
+        this.canvas.width = 1440;
+        this.canvas.height = 810;
+        this.canvas.style = "padding: 0; margin: auto; display: block; width: 1000px;";
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
@@ -76,31 +78,37 @@ function component(width, height, color, x, y, type) {
 	}
     }
 
-/*     this.onHound = function() {
-        // return true if this is on hound (daxtrot)
+  this.onHound = function() {
+        // return true if player is on hound (daxtrot)
             if(this.type == "player") {
                 if(this.y > daxtrot.y - this.height) //sjekker om playerbrikkens y-verdi er større (altså lengre ned i canvas) enn daxtrots yverdi
-                    onhound = true;
                     return true;
             }
             else {
-            
-            return false;
-            }
-        } */
+                    return false;
+                }
+        }
 
     this.applyGravity = function() {
-        if (this.onGround()) { 
+        if (this.onGround()) { // piece is on bottom ground, stop there.
         this.y = myGameArea.canvas.height - this.height;
 	    this.speedY = 0;
         }
-        else if(this.type == "player" && onhound == false) {
-            accelY(player1,-gravity);
-            if(this.y > daxtrot.y - this.height) {
-                    onhound = true;
-        }
-
-            console.log(onhound)
+        else if(this.onHound() && onhound == false)
+        {
+            
+            this.y = daxtrot.y - this.height;
+            this.speedY = 0;
+            if(color == "red")
+            {
+                p1onhound = true;
+            }
+            else if(color == "green")
+            {
+                p2onhound = true;
+            }
+            
+            //console.log("hound hit: " + color);
         }
 	    else { // piece is in the air, apply gravity
 	    if (this.y < 1) { // make sure we don't leave screen at top
@@ -108,14 +116,15 @@ function component(width, height, color, x, y, type) {
 	    }
         
         //dette må ryddes opp i. for mye if-else, og å sjekke etter color er ikke helt optimalt. var bare løsninga jeg kom på først under testing
- /*        if(color == "red" && onhound == false)
+       if(color == "red" && p1onhound == false)
         {
+            console.log("downwards gravity")
             accelY(player1,-gravity);
         }
-        else if(color == "green")
+        else if(color == "green" && p2onhound == false)
         {
             accelY(player2,-gravity);
-        } */
+        } 
         else
         {
             accelY(daxtrot,-gravity);
@@ -180,7 +189,6 @@ function updateGameArea() {
     player2.update();
     // check button status after update
     if (button2Held && button3Held && daxtrot.onGround()) {
-	//console.log("button 1 is held!")
 	accelX(daxtrot, 1);
     accelX(player1, 1);
     accelX(player2, 1);
@@ -197,6 +205,8 @@ function updateGameArea() {
         accelX(player2, 0);
 	}
     }
+
+    console.log(p1onhound + " og " + p2onhound)
 }
 
 function everyinterval(n) {
@@ -221,43 +231,45 @@ function butDown(keycode) {
 //Kjøres om en av de designerte spilleknappene er trykt og slippes (keyup) 
 function butUp() {
 
-    if (button2Held && button3Held && daxtrot.onGround()) {
+    if (button2Held && button3Held && daxtrot.onGround() && p1onhound && p2onhound) {
         accelY(daxtrot, 5); 
         accelY(player1, 5); 
-        accelY(player2, 5);        
+        accelY(player2, 5); 
+        p1onhound = false;
+        p2onhound = false;       
         } 
     else if(button2Held)
     {
-        if(player1.onGround() || onhound)
+        if(player1.onGround() || p1onhound)
         {
            
             accelY(player1, 6);
+            p1onhound = false;
         }
-        
     }
     else if(button3Held)
     {
-        if(player2.onGround())
-        {
-            
+        if(player2.onGround() || p2onhound)
+        {   
             accelY(player2, 6); 
+            p2onhound = false;
             //accelX(player1, 2);   
         }
-        
     }
 
-    //Dette kan sikkert optimaliseres også
+    //Dette kan definitivt optimaliseres.
     button1Held = false;
     button2Held = false;
     button3Held = false;
 
 }
 
-//Hoppefunksjon
+// Hoppefunksjon, y-verdi, oppover
 function accelY(piece, n) {
     piece.speedY -= n;
 }
 
+// Hoppefunksjon, x-verdi, forover
 function accelX(piece, n) {
     piece.speedX = n;
 }
