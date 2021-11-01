@@ -8,7 +8,7 @@ var button3Held = false;
 var p1key = "KeyQ";
 var p2key = "KeyP";
 var type;
-const gravity = 0.1;
+const gravity = 0.2;
 var onhound = false;
 var p1onhound = false;
 var p2onhound = false;
@@ -16,9 +16,9 @@ var game = true;
 var hscore = localStorage.getItem('hscore'); // Lagrer en highscore i nettleserens lokallagring. Lagres mellom økter på samme maskin, men ikke mellom enheter eller forskjellige nettlesere.
 
 function startGame() {
-    daxtrot = new component(160, 70, "blue", 10, 460, "daxtrot");
-    player1 = new component(60, 40, "red", 10, 410, "player");  //
-    player2 = new component(60, 40, "green", 110, 410, "player");
+    daxtrot = new component(160, 50, "blue", 10, 700, "daxtrot");
+    player1 = new component(60, 40, "red", 10, 650, "player");  //
+    player2 = new component(60, 40, "green", 110, 650, "player");
     myScore = new component("30px", "Consolas", "black", 40, 40, "text");
     myGameArea.start();
 }
@@ -119,7 +119,6 @@ function component(width, height, color, x, y, type) {
         //dette må ryddes opp i. for mye if-else, og å sjekke etter color er ikke helt optimalt. var bare løsninga jeg kom på først under testing
        if(color == "red" && p1onhound == false)
         {
-            //console.log("downwards gravity")
             accelY(player1,-gravity);
         }
         else if(color == "green" && p2onhound == false)
@@ -182,10 +181,10 @@ function updateGameArea() {
     myGameArea.clear();
     myGameArea.frameNo += 1;
     if (myGameArea.frameNo == 1 || everyinterval(250)) {
-        minHeight = 10;
-        maxHeight = 75;
-        minWidth = 10;
-        maxWidth = 75;
+        minHeight = 25;
+        maxHeight = 100;
+        minWidth = 20;
+        maxWidth = 80;
         height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
         width = Math.floor(Math.random()*(maxWidth-minWidth+1)+minWidth);
         x = myGameArea.canvas.width;
@@ -207,16 +206,22 @@ function updateGameArea() {
     player2.update();
     // check button status after update
     if (button2Held && button3Held && daxtrot.onGround()) {
-	accelX(daxtrot, 2);
-    accelX(player1, 2);
-    accelX(player2, 2);
+	accelX(daxtrot, 3);
+    accelX(player1, 3);
+    accelX(player2, 3);
     }
     else if (daxtrot.onGround()) {
-	if (daxtrot.x > 10) {
+	if (daxtrot.x > 10 && daxtrot.x < 600) {
 	    accelX(daxtrot, -1);
         accelX(player1, -1);
         accelX(player2, -1);
 	}
+    else if(daxtrot.x >= 600)
+    {
+        accelX(daxtrot, -2);
+        accelX(player1, -2);
+        accelX(player2, -2);
+    }
 	else {
 	    accelX(daxtrot, 0);
         accelX(player1, 0);
@@ -224,7 +229,6 @@ function updateGameArea() {
 	}
     }
 
-    //console.log(p1onhound + " og " + p2onhound)
 }
 
 function everyinterval(n) {
@@ -233,11 +237,8 @@ function everyinterval(n) {
 }
 
 function butDown(keycode) {
-   //Her lagres verdi for om en knapp holdes nede
-    if (keycode == "Space") {
-        button1Held = true;
-    }
-    else if(keycode == p1key) {
+   // Her lagres verdi for om en knapp holdes nede
+    if(keycode == p1key) {
         button2Held = true;
     }
     else if(keycode == p2key) {
@@ -246,13 +247,14 @@ function butDown(keycode) {
 }
 
 
-//Kjøres om en av de designerte spilleknappene er trykt og slippes (keyup) 
+// Kjøres om en av de designerte spilleknappene er trykt og slippes (keyup) 
+// Det er her vi må fikse på ting for å sørge for at ikke bare én spiller kan slippe knappen, så hopper daxtrot fortsatt.
 function butUp() {
 
     if (button2Held && button3Held && daxtrot.onGround() && p1onhound && p2onhound) {
-        accelY(daxtrot, 5); 
-        accelY(player1, 5); 
-        accelY(player2, 5); 
+        accelY(daxtrot, 9); 
+        accelY(player1, 9); 
+        accelY(player2, 9); 
         p1onhound = false;
         p2onhound = false;       
         } 
@@ -273,8 +275,6 @@ function butUp() {
         }
     }
 
-    //Dette kan definitivt optimaliseres.
-    button1Held = false;
     button2Held = false;
     button3Held = false;
 
