@@ -1,6 +1,7 @@
 var daxtrot, player1, player2;
 var myObstacles = [];
 var myScore;
+var currscore = 0;
 var button1Held = false;
 var button2Held = false;
 var button3Held = false;
@@ -11,11 +12,13 @@ const gravity = 0.1;
 var onhound = false;
 var p1onhound = false;
 var p2onhound = false;
+var game = true;
+var hscore = localStorage.getItem('hscore'); // Lagrer en highscore i nettleserens lokallagring. Lagres mellom økter på samme maskin, men ikke mellom enheter eller forskjellige nettlesere.
 
 function startGame() {
-    daxtrot = new component(160, 100, "blue", 10, 460, "daxtrot");
-    player1 = new component(60, 40, "red", 10, 420, "player");  //
-    player2 = new component(60, 40, "green", 110, 420, "player");
+    daxtrot = new component(160, 70, "blue", 10, 460, "daxtrot");
+    player1 = new component(60, 40, "red", 10, 410, "player");  //
+    player2 = new component(60, 40, "green", 110, 410, "player");
     myScore = new component("30px", "Consolas", "black", 40, 40, "text");
     myGameArea.start();
 }
@@ -25,7 +28,7 @@ var myGameArea = {
     start : function() {
         this.canvas.width = 1440;
         this.canvas.height = 810;
-        this.canvas.style = "padding: 0; margin: auto; display: block; width: 1000px;";
+        this.canvas.style = "padding: 0; margin: auto; display: block; width: 1000px; height: 500px;";
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
@@ -62,8 +65,6 @@ function component(width, height, color, x, y, type) {
         this.x += this.speedX;
         this.y += this.speedY; 
         this.applyGravity();
-
-        
     }
     this.onGround = function() {
 	// return true if this is on the ground
@@ -118,7 +119,7 @@ function component(width, height, color, x, y, type) {
         //dette må ryddes opp i. for mye if-else, og å sjekke etter color er ikke helt optimalt. var bare løsninga jeg kom på først under testing
        if(color == "red" && p1onhound == false)
         {
-            console.log("downwards gravity")
+            //console.log("downwards gravity")
             accelY(player1,-gravity);
         }
         else if(color == "green" && p2onhound == false)
@@ -149,12 +150,33 @@ function component(width, height, color, x, y, type) {
     }
 }
 
+function checkHiScore(thisscore) {
+    if(thisscore>hscore)
+    {
+        localStorage.setItem('hscore', thisscore)
+        return "Congratulations, new highscore!";
+    }
+    else
+    {
+        return "No highscore this time. "
+    }
+        
+
+}
+
 function updateGameArea() {
     
     var x, height, minHeight, maxHeight;
     for (i = 0; i < myObstacles.length; i += 1) {
         if (daxtrot.crashWith(myObstacles[i]) || player1.crashWith(myObstacles[i]) || player2.crashWith(myObstacles[i])) {
+            if(game) // kjøres ved game over, 1 gang
+            {
+                currscore = myGameArea.frameNo;
+                alert("Game over. Your score: " + currscore + ". " + checkHiScore(currscore) + " Refresh the page to try again.")
+            }
+            game = false;
             return;
+
         } 
     }
     myGameArea.clear();
@@ -168,10 +190,6 @@ function updateGameArea() {
         width = Math.floor(Math.random()*(maxWidth-minWidth+1)+minWidth);
         x = myGameArea.canvas.width;
 	y = myGameArea.canvas.height - height;
-        // minGap = 50;
-        // maxGap = 200;
-        // gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
-        // myObstacles.push(new component(10, height, "green", x, 0));
         var randomColor = "#" + Math.floor(Math.random()*16777215).toString(16);
         myObstacles.push(new component(width, height, randomColor, x, y));
     }
@@ -189,9 +207,9 @@ function updateGameArea() {
     player2.update();
     // check button status after update
     if (button2Held && button3Held && daxtrot.onGround()) {
-	accelX(daxtrot, 1);
-    accelX(player1, 1);
-    accelX(player2, 1);
+	accelX(daxtrot, 2);
+    accelX(player1, 2);
+    accelX(player2, 2);
     }
     else if (daxtrot.onGround()) {
 	if (daxtrot.x > 10) {
@@ -206,7 +224,7 @@ function updateGameArea() {
 	}
     }
 
-    console.log(p1onhound + " og " + p2onhound)
+    //console.log(p1onhound + " og " + p2onhound)
 }
 
 function everyinterval(n) {
@@ -240,20 +258,18 @@ function butUp() {
         } 
     else if(button2Held)
     {
-        if(player1.onGround() || p1onhound)
+        if(p1onhound)
         {
-           
             accelY(player1, 6);
             p1onhound = false;
         }
     }
     else if(button3Held)
     {
-        if(player2.onGround() || p2onhound)
+        if(p2onhound)
         {   
-            accelY(player2, 6); 
+            accelY(player2, 6);
             p2onhound = false;
-            //accelX(player1, 2);   
         }
     }
 

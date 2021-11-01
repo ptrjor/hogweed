@@ -2,7 +2,7 @@ canvas {
     align-self: center;
     border:1px solid #d3d3d3;
     background-color: lightgray;
-    /* background-image: url(https://img.itch.zone/aW1hZ2UvNzczNzQvMzYxOTcwLnBuZw==/original/xdyh04.png); */
+    /* background-image: url(examplebackground.png); */
 
 }
 
@@ -11,4 +11,16 @@ button
     width: 20%;
     height: 10%;
     background-color: mediumslateblue;
+}
+
+#p1
+{
+    font-size: large;
+    color: red;
+}
+
+#p2
+{
+    font-size: large;
+    color: green;
 }
