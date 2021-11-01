@@ -1,4 +1,4 @@
-var myGamePiece, myGamePiece2, myGamePiece3;
+var daxtrot, player1, player2;
 var myObstacles = [];
 var myScore;
 var button1Held = false;
@@ -8,11 +8,12 @@ var p1key = "KeyQ";
 var p2key = "KeyP";
 var type;
 const gravity = 0.1;
+var onhound = false;
 
 function startGame() {
-    myGamePiece = new component(80, 50, "blue", 10, 540, "daxtrot");
-    myGamePiece2 = new component(30, 20, "red", 10, 490, "player");  //
-    myGamePiece3 = new component(30, 20, "green", 60, 490, "player");
+    daxtrot = new component(80, 50, "blue", 10, 460, "daxtrot");
+    player1 = new component(30, 20, "red", 10, 420, "player");  //
+    player2 = new component(30, 20, "green", 60, 420, "player");
     myScore = new component("30px", "Consolas", "black", 40, 40, "text");
     myGameArea.start();
 }
@@ -59,57 +60,65 @@ function component(width, height, color, x, y, type) {
         this.x += this.speedX;
         this.y += this.speedY; 
         this.applyGravity();
+
+        
     }
     this.onGround = function() {
-
 	// return true if this is on the ground
-        
         var rockbottom = myGameArea.canvas.height - this.height;
-        if(this.type === "player")
-        {
-            /* Her settes "rockbottom" for playerobjektene cirka til y-verdien til daxtrot, altså mygamepiece.y. 
-             når playerobjektene treffer denne blir de reseta til deres standard y-verdi som du ser under testing. 
-             Den bør vel heller settes til y-verdien til daxtrot, eller noe liknende. Ærlig talt litt for mye testing fram 
-             og tilbake her uten å ha en helt krystallklar plan for hva ting bør gjøre. Derfor sier jeg det er rotete - så du 
-             får gjøre hva du vil ut av det. Gjerne re-design dette om du synes dette blir feil. Veldig usikker selv. */
-
-            rockbottom = myGamePiece.y - myGamePiece.height/2;
-          
-            
-        }
+        
         if (this.y >= rockbottom) {
 	    return true;
 	}
+ 
 	else {
 	    return false;
 	}
     }
 
-   // console.log(this.onGround() + " type: " + this.type)
+/*     this.onHound = function() {
+        // return true if this is on hound (daxtrot)
+            if(this.type == "player") {
+                if(this.y > daxtrot.y - this.height) //sjekker om playerbrikkens y-verdi er større (altså lengre ned i canvas) enn daxtrots yverdi
+                    onhound = true;
+                    return true;
+            }
+            else {
+            
+            return false;
+            }
+        } */
 
     this.applyGravity = function() {
-        if (this.onGround()) {
-        //console.log("piece on ground: " + color)
-	    this.y = y - this.height;
+        if (this.onGround()) { 
+        this.y = myGameArea.canvas.height - this.height;
 	    this.speedY = 0;
         }
-	else { // piece is in the air, apply gravity
+        else if(this.type == "player" && onhound == false) {
+            accelY(player1,-gravity);
+            if(this.y > daxtrot.y - this.height) {
+                    onhound = true;
+        }
+
+            console.log(onhound)
+        }
+	    else { // piece is in the air, apply gravity
 	    if (this.y < 1) { // make sure we don't leave screen at top
 		this.y = 1;
 	    }
         
         //dette må ryddes opp i. for mye if-else, og å sjekke etter color er ikke helt optimalt. var bare løsninga jeg kom på først under testing
-        if(color == "red")
+ /*        if(color == "red" && onhound == false)
         {
-            accelY(myGamePiece2,-gravity);
+            accelY(player1,-gravity);
         }
         else if(color == "green")
         {
-            accelY(myGamePiece3,-gravity);
-        }
+            accelY(player2,-gravity);
+        } */
         else
         {
-            accelY(myGamePiece,-gravity);
+            accelY(daxtrot,-gravity);
         }
 	}
     }
@@ -132,9 +141,10 @@ function component(width, height, color, x, y, type) {
 }
 
 function updateGameArea() {
-    var x, height, gap, minHeight, maxHeight, minGap, maxGap;
+    
+    var x, height, minHeight, maxHeight;
     for (i = 0; i < myObstacles.length; i += 1) {
-        if (myGamePiece.crashWith(myObstacles[i])) {
+        if (daxtrot.crashWith(myObstacles[i]) || player1.crashWith(myObstacles[i]) || player2.crashWith(myObstacles[i])) {
             return;
         } 
     }
@@ -153,7 +163,8 @@ function updateGameArea() {
         // maxGap = 200;
         // gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
         // myObstacles.push(new component(10, height, "green", x, 0));
-        myObstacles.push(new component(width, height, "green", x, y));
+        var randomColor = "#" + Math.floor(Math.random()*16777215).toString(16);
+        myObstacles.push(new component(width, height, randomColor, x, y));
     }
     for (i = 0; i < myObstacles.length; i += 1) {
         myObstacles[i].x += -2;
@@ -161,29 +172,29 @@ function updateGameArea() {
     }
     myScore.text="SCORE: " + myGameArea.frameNo;
     myScore.update();
-    myGamePiece.newPos();
-    myGamePiece.update();
-    myGamePiece2.newPos();
-    myGamePiece2.update();
-    myGamePiece3.newPos();
-    myGamePiece3.update();
+    daxtrot.newPos();
+    daxtrot.update();
+    player1.newPos();
+    player1.update();
+    player2.newPos();
+    player2.update();
     // check button status after update
-    if (button3Held && button2Held && myGamePiece.onGround()) {
+    if (button2Held && button3Held && daxtrot.onGround()) {
 	//console.log("button 1 is held!")
-	myGamePiece.speedX = 1;
-    myGamePiece2.speedX = 1;
-    myGamePiece3.speedX = 1;
+	accelX(daxtrot, 1);
+    accelX(player1, 1);
+    accelX(player2, 1);
     }
-    else if (myGamePiece.onGround()) {
-	if (myGamePiece.x > 10) {
-	    myGamePiece.speedX = -1;
-        myGamePiece2.speedX = -1;
-        myGamePiece3.speedX = -1;
+    else if (daxtrot.onGround()) {
+	if (daxtrot.x > 10) {
+	    accelX(daxtrot, -1);
+        accelX(player1, -1);
+        accelX(player2, -1);
 	}
 	else {
-	    myGamePiece.speedX = 0;
-        myGamePiece2.speedX = 0;
-        myGamePiece3.speedX = 0;
+	    accelX(daxtrot, 0);
+        accelX(player1, 0);
+        accelX(player2, 0);
 	}
     }
 }
@@ -210,22 +221,27 @@ function butDown(keycode) {
 //Kjøres om en av de designerte spilleknappene er trykt og slippes (keyup) 
 function butUp() {
 
-    if (button2Held && button3Held && myGamePiece.onGround()) {
-        accelY(myGamePiece, 5);        
+    if (button2Held && button3Held && daxtrot.onGround()) {
+        accelY(daxtrot, 5); 
+        accelY(player1, 5); 
+        accelY(player2, 5);        
         } 
     else if(button2Held)
     {
-        if(myGamePiece2.onGround())
+        if(player1.onGround() || onhound)
         {
-            accelY(myGamePiece2, 6);
-              
+           
+            accelY(player1, 6);
         }
+        
     }
     else if(button3Held)
     {
-        if(myGamePiece3.onGround())
+        if(player2.onGround())
         {
-            accelY(myGamePiece3, 6);    
+            
+            accelY(player2, 6); 
+            //accelX(player1, 2);   
         }
         
     }
@@ -243,7 +259,7 @@ function accelY(piece, n) {
 }
 
 function accelX(piece, n) {
-    piece.speedX += n;
+    piece.speedX = n;
 }
 
 //Keydown-sjekker
@@ -253,9 +269,7 @@ document.addEventListener('keydown', (event) => {
 
 //Keyup-sjekker
 document.addEventListener('keyup', (event) => {
-    if (event.code == "Space" || p1key || p2key) {
 	butUp(event.code);
-    }
 }, false);
 
 
