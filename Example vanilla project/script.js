@@ -38,7 +38,8 @@ var gameArea = {
     this.canvas.height = 720;
     this.canvas.style = "padding: 0; margin: auto; display: block; width: 1000px; height: 560px;";
     this.context = this.canvas.getContext("2d");
-    document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+    document.body.insertBefore(this.canvas, document.getElementById("spilldiv"));  
+    // Her settes spillcanvas inn før en div kalt spilldiv, slik at vi kan endre plasseringen av spillet på nettsiden
     this.frameNo = 0;
     this.interval = setInterval(updateGameArea, 20);
     rockbottom = gameArea.canvas.height - 90;
@@ -426,17 +427,25 @@ function accelX(piece, n) {
   piece.speedX = n;
 }
 
-//Keydown-sjekker
+// Keydown-sjekker
 document.addEventListener('keydown', (event) => {
   butDown(event.code);
 }, false);  
 
-//Keyup-sjekker
+// Keyup-sjekker
 document.addEventListener('keyup', (event) => {
   butUp(event.code);
 }, false);
 
 
+// Nav-bar funksjoner
+function openNav() {
+  document.getElementById("mySidenav").style.width = "250px";
+}
+
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "0";
+}
 
 
 

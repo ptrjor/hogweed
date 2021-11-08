@@ -1,3 +1,119 @@
+/* Under er css for tekst og bilder */
+
+#logo {
+    width: 200px;
+}
+
+#navigasjon {
+    font-size: 30px;
+    cursor: pointer;
+    display: flex;
+    justify-content: left;
+    padding: 2%;
+  }
+
+.grid-container {
+    display: grid;
+    grid-column-gap: 50px;
+    grid-template-columns: auto auto;
+    padding: 10px;
+    align-items: center;
+}
+  
+.grid-item {
+    padding: 20px;
+    font-size: 30px;
+    text-align: center;
+}
+
+.bold{
+    font-weight: bold;
+    font-size: 25px;
+    margin-bottom: 5%;
+}
+
+.flex {
+    display: flex;
+    justify-content: center;
+    gap: 25%;
+    padding: 10px;
+    margin-right: 20%;
+    margin-left: 20%;
+}
+
+
+#p1
+{
+    padding: 5px;
+    font-size: large;
+    color: green;
+}
+
+#p2
+{
+    padding: 5px;
+    font-size: large;
+    color: red;
+}
+
+
+/* Under er css for navigasjonsbaren */
+
+
+
+body {
+    font-family: "Lato", sans-serif;
+  }
+  
+  .sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: rgb(255, 255, 255);
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+  }
+  
+  .sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+  }
+  
+  .sidenav a:hover {
+    color: #f1f1f1;
+  }
+
+  .sidenav img {
+      width: 50%;
+      margin-left: 15%;
+      transition: 0.3s;
+  }
+  
+  .sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+  }
+  
+  @media screen and (max-height: 450px) {
+    .sidenav {padding-top: 15px;}
+    .sidenav a {font-size: 18px;}
+  }
+
+
+
+/* Under er css relatert til spillet */
+
 canvas {
     align-self: center;
     border:1px solid #d3d3d3;
@@ -97,15 +213,6 @@ button
     background-color: mediumslateblue;
 }
 
-#p1
-{
-    font-size: large;
-    color: green;
-}
 
-#p2
-{
-    font-size: large;
-    color: red;
-}
 
+  
