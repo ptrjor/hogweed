@@ -1,9 +1,93 @@
 canvas {
     align-self: center;
     border:1px solid #d3d3d3;
-    background-color: lightgray;
-    /* background-image: url(https://img.itch.zone/aW1hZ2UvNzczNzQvMzYxOTcwLnBuZw==/original/xdyh04.png); */
+    /* background-color: lightgray; */
+    /* background-image: url(assets/examplebackground.png); */
+}
 
+#bg_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 100% ; 
+    /* width: 64px; */
+    background-image: url(assets/examplebackground.png);
+    visibility: hidden;
+}
+
+#ground_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 64px ; 
+    width: 962px; 
+    background-image: url(assets/rock_ground.png);
+    visibility: hidden;
+}
+
+#hinder_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 64px;
+    width: 64px;
+    background-image: url(assets/player_1.png);
+    visibility: hidden;
+}
+
+#daxtrot_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 96px;
+    width: 256px;
+    background-image: url(assets/dax.png);
+    visibility: hidden;
+}
+#player1_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 64px;
+    width: 48px;
+    background-image: url(assets/player_2.png);
+    visibility: hidden;
+}
+#player2_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 48px;
+    width: 64px;
+    background-image: url(assets/player_2.png);
+    visibility: hidden;
+}
+
+#but1_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 73px;
+    width: 146px;
+    background-image: url(assets/button1.png);
+    visibility: hidden;
+}
+#but2_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 73px;
+    width: 146px;
+    background-image: url(assets/button2.png);
+    visibility: hidden;
 }
 
 button
@@ -12,3 +96,16 @@ button
     height: 10%;
     background-color: mediumslateblue;
 }
+
+#p1
+{
+    font-size: large;
+    color: green;
+}
+
+#p2
+{
+    font-size: large;
+    color: red;
+}
+

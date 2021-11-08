@@ -1,3 +1,0 @@
-Det var utrolig mange ringer å hoppe gjennom for å tilgang på
-repositoriet i terminalen. Hvis jeg klarer å laste opp denne fila, har
-jeg klart det :)

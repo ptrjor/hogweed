@@ -1,18 +1,33 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<link rel="stylesheet" href="style.css">
-</head>
-<body onload="startGame()">
-<script src="script.js"></script>
-<br>
-<center>
-    <h1>Daxtrot Prototype</h1>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body onload="startGame()">
+    <script src="script.js"></script>
     <br>
-<p>Bring the daxtrot to the end!</p>
-<br>
-<button onmousedown="butDown()" onmouseup="butUp()">(SPACE TO JUMP)</button>
-</center>
-</body>
+    <center>
+      <ul>
+	<h1>Daxtrot Prototype</h1>
+	<br>
+	<p>Bring the daxtrot to the end!</p>
+	
+	<p><h3>Controls</h3></p>
+        <p id="p1">Player 1: Q</p>
+        <p id="p2">Player 2: P</p>
+      </ul>
+    </center>
+    <!-- ugly, hvis vi ikke plasserer element med id "daxtrot" på
+    siden, får vi ingen sprites -->
+    <img id="bg_spr" src="assets/examplebackground.png"></img>
+    <img id="ground_spr" src="assets/rock_ground.png"></img>
+    <img id="daxtrot_spr" src="assets/dax.png"></img>
+    <img id="player1_spr" src="assets/player_1.png"></img>
+    <img id="player2_spr" src="assets/player_2.png"></img>
+    <img id="hinder_spr" src="assets/hinder.png"></img>
+    <img id="but1_spr" src="assets/button1.png"></img>
+    <img id="but2_spr" src="assets/button2.png"></img>
+  </body>
 </html>
+
