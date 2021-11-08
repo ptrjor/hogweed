@@ -23,12 +23,12 @@ function startGame() {
   bg = new sprComponent(2412, 810, "bg_spr", 0, 1, 1, 1);
   player1 = new sprComponent(62, 48, "player1_spr", 10, 7, 40, 400); 
   player2 = new sprComponent(62, 48, "player2_spr", 0, 7, 130, 400);
-  daxtrot = new sprComponent(256, 96, "daxtrot_spr", 15, 4, 10, 850);
+  daxtrot = new sprComponent(256, 96, "daxtrot_spr", 20, 4, 10, 850);
   // obs = new sprComponent(64, 64, "hinder_spr", 1, 1, 700, 700);
   myScore = new txtComponent("30px", "Consolas", "black", 40, 40);
-  but1 = new hudComponent(73, 73, 'but1_spr', 10, gameArea.canvas.height-80);
-  but2 = new hudComponent(73,73,'but2_spr',
-                          gameArea.canvas.width-85,gameArea.canvas.height-80);
+  but1 = new hudComponent(56, 56, 'but1_spr', 10, gameArea.canvas.height-60);
+  but2 = new hudComponent(56, 56,'but2_spr',
+                          gameArea.canvas.width-66,gameArea.canvas.height-60);
 }
 
 var gameArea = {
@@ -147,27 +147,51 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
       this.y = rockbottom - this.height + this.sprBorder;
       this.speedY = 0;
       if (this.onHound() == false) {
-        if (this.x > daxtrot.x) {
-          this.speedX = -5;
-        }
-        else if(this.x < daxtrot.x) {
+        if(this.x < daxtrot.x) {
           this.speedX = 5;
+          // switch to running animation
+          if (this.sprReel != 1) {
+            this.sprFrame = 0; }
+          this.sprReel = 1;
+        }
+        else if (this.x > daxtrot.x) {
+          this.speedX = -5;
+          // run left animation
+          if (this.sprReel != 2) {
+            this.sprFrame = 0; }
+          this.sprReel = 2;
+          console.log("swtich anim.")
         }
       }
       else { // onGround && onHound
         this.y = daxtrot.y // jump back up
         if (this.x < daxtrot.x) {
           this.x += this.width * 1.25
-          // todo: push other player if overlapping position
+          // push other player forward if overlapping position
+          if (this == player1 && this.crashWith(player2)) {
+            for (let i = 20; this.crashWith(player2); true)
+              player2.x += i; }
+          else if (this == player2 && this.crashWith(player1)) {
+            for (let i = 20; this.crashWith(player1); true)
+              player1.x += i; }
         }
         else {
           this.x -= this.width * 1.25
+          // push other player back if overlapping position
+          if (this == player1 && this.crashWith(player2)) {
+            for (let i = 20; this.crashWith(player2); true)
+              player2.x -= i; }
+          else if (this == player2 && this.crashWith(player1)) {
+            for (let i = 20; this.crashWith(player1); true)
+              player1.x -= i; }
         }
+        this.sprReel = 0;
+        this.sprFrame = 0;
       }
     }
     else if (this.onHound() && this.sprSheet != 'daxtrot' && this.speedY > -1)
     {
-      this.y = daxtrot.y 
+      this.y = daxtrot.y - this.height / 2 + daxtrot.sprBorder
       this.speedY = daxtrot.speedY;
       this.speedX = daxtrot.speedX;      
     }
@@ -323,9 +347,20 @@ function checkButtons() { // check if anyone are jumping
     daxtrot.speedX = 0;
     if (b1Held && b2Held && player1.onHound() && player2.onHound()) {
       daxtrot.speedX = 3;
+      // running animation
+      if (daxtrot.sprReel != 1) { daxtrot.sprFrame = 0; }
+      daxtrot.sprReel = 1
     }
     else if (((b1Held && player1.onHound()) || (b2Held && player2.onHound)) && daxtrot.x > 20 && daxtrot.onGround()) {
       daxtrot.speedX = -3;
+      // trot left animation
+      if (daxtrot.sprReel != 2) { daxtrot.sprFrame = 0; }
+      daxtrot.sprReel = 2;
+    }
+    else {
+      daxtrot.speedX = 0;
+      if (daxtrot.sprReel != 0) { daxtrot.sprFrame = 0; }
+      daxtrot.sprReel = 0;
     }
   }
 }
