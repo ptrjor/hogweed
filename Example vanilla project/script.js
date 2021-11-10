@@ -7,6 +7,8 @@ const groundWt = 962 ;
 var curScore = 0
 var p1Key = "KeyQ";
 var p2Key = "KeyP";
+var b1Held = false;
+var b2Held = false;
 const gravity = 0.2;
 var game = true;
 var hiScore = localStorage.getItem('hiScore'); // Lagrer en highscore i nettleserens lokallagring. Lagres mellom økter på samme maskin, men ikke mellom enheter eller forskjellige nettlesere.
@@ -66,9 +68,16 @@ function hudComponent(width, height, sprite, startX, startY) {
   this.x = startX
   this.y = startY
   this.sprSheet = sprite;
-  this.update = function() { // function(isHeld) {
+  this.update = function(isHeld) { // function(isHeld) {
     var imgId = this.sprSheet
-    sx = 0 // set to this.width to get hilit button sprite
+    if(isHeld)
+    {
+      sx = this.width;
+    }
+    else{
+      sx = 0
+    }
+     // set to this.width to get hilit button sprite
     sy = 0 
     ctx.drawImage(document.getElementById(imgId), sx, sy,
 		  this.width, this.height, this.x, this.y,
@@ -241,13 +250,11 @@ function checkHiScore(thisscore) {
 }
 
 function updateGameArea() {
-  var x, height, minHeight, maxHeight;
+  var x;
   for (i = 0; i < obstacles.length; i += 1) {
     if (daxtrot.crashWith(obstacles[i])) {
-      console.log("AAA lkjsadf")
       if(game) // kjøres ved game over, 1 gang
       {
-        console.log("lkjsadf")
         alert("Game over. Your score: " + curScore + ". " + checkHiScore(curScore) + " Refresh the page to try again.")
         game = false
       }
@@ -260,7 +267,7 @@ function updateGameArea() {
   var hinderInterval = 400 // spawn hinder every N frames
   let groundInterval = (groundWt / 4).toFixed(0) // spawn unending ground tiles
   var paralaxInterval = 12 // scroll background
-  bg.update()
+  bg.update();
   gameArea.frameNo += 1;
   // scroll background, increment score
   if (gameArea.frameNo == 1 || everyinterval(groundInterval)) {
@@ -305,7 +312,7 @@ function updateGameArea() {
   // random verdi til hinderInterval for litt variasjon
   if (gameArea.frameNo == 1 || everyinterval(hinderInterval)) {
     x = gameArea.canvas.width;
-    y = rockbottom - 55
+    y = rockbottom - 55;
     obstacles.push(new sprComponent(64, 64, "hinder_spr", 5, 1, x, y));
   }
   // reset button status
@@ -313,8 +320,8 @@ function updateGameArea() {
     player1.button = false;
     player2.button = false;
   }
-  but1.update();
-  but2.update();
+  but1.update(b1Held);
+  but2.update(b2Held);
 }
 
 function everyinterval(n) {
@@ -335,7 +342,6 @@ function butUp(keycode) {
   }
   else {
     return
-    console.log("Pressed button: "+keycode);
   }
   console.log(pThis.sprSheet+" pressed button")
   console.log("Status of this player.button: "+pThis.button)
@@ -358,83 +364,22 @@ function butUp(keycode) {
   }
   // check player jumps
   if (pThis.onHound()) { 
-    // console.log("p1 cur speed X/Y: "+pThis.speedX+"/"+player1.speedY);
     pThis.speedY = -9;
     pThis.speedX = 3;
-    // console.log("p1 jump speed X/Y: "+pThis.speedX+"/"+player1.speedY);
   }
-  // if(b2Release) {
-  //   b2Held = false;
-  //   b2Release = false;
-  //   if (player2.onHound()) {
-  //     console.log("p2 cur speed X/Y: "+player2.speedX+"/"+player2.speedY);
-  //     player2.speedY = -9;
-  //     console.log("p2 jump speed X/Y: "+player2.speedX+"/"+player2.speedY);
-  //   }
-  // }
-  // // check daxtrot speed
-  // if (daxtrot.onGround && daxtrot.speedY == 0) {
-  //   daxtrot.speedX = 0;
-  //   if (b1Held && b2Held && player1.onHound() && player2.onHound()) {
-  //     daxtrot.speedX = 3;
-  //     // running animation
-  //     if (daxtrot.sprReel != 1) { daxtrot.sprFrame = 0; }
-  //     daxtrot.sprReel = 1
-  //   }
-  //   else if (((b1Held && player1.onHound()) || (b2Held && player2.onHound)) && daxtrot.x > 20 && daxtrot.onGround()) {
-  //     daxtrot.speedX = -3;
-  //     // trot left animation
-  //     if (daxtrot.sprReel != 2) { daxtrot.sprFrame = 0; }
-  //     daxtrot.sprReel = 2;
-  //   }
-  //   else {
-  //     daxtrot.speedX = 0;
-  //     if (daxtrot.sprReel != 0) { daxtrot.sprFrame = 0; }
-  //     daxtrot.sprReel = 0;
-  //   }
-  // }
+  
 }
 
-// function butDown(keycode) {
-//   // Her lagres verdi for om en knapp holdes nede
-//   if(keycode == p1Key) {
-//     b1Held = true;
-//   }
-//   else if(keycode == p2Key) {
-//     b2Held = true;
-//   }
-// }
+function butDown(keycode) {
+  // Her lagres verdi for om en knapp holdes nede - gjeninnførte for å bruke spriteupdate på knappene 10.11 -Petter
+  if(keycode == p1Key) {
+    b1Held = true;
+  }
+  else if(keycode == p2Key) {
+    b2Held = true;
+  }
+}
 
-// Kjøres om en av de designerte spilleknappene er trykt og slippes (keyup) 
-// Det er her vi må fikse på ting for å sørge for at ikke bare én spiller kan slippe knappen, så hopper daxtrot fortsatt.
-  
-//   if (b1Held && b2Held && daxtrot.onGround() && player1.onhound && player2.onhound) {
-//     console.log("Bla")
-//     accelY(daxtrot, 9); 
-//     accelY(player1, 9); 
-//     accelY(player2, 9); 
-//     p1OnHound = false;
-//     p2OnHound = false;       
-//     } 
-//   else if(b1Held)
-//   {
-//       if(p1OnHound)
-//       {
-//           accelY(player1, 6);
-//           p1OnHound = false;
-//         }
-//     }
-//   else if(b2Held)
-//   {
-//       if(p2OnHound)
-//       {   
-//           accelY(player2, 6);
-//           p2OnHound = false;
-//       }
-//   }
-//   b1Held = false;
-//   b2Held = false;
-// }
 
 // Hoppefunksjon, y-verdi, oppover
 function accelY(piece, n) {
@@ -454,6 +399,12 @@ document.addEventListener('keydown', (event) => {
 // Keyup-sjekker
 document.addEventListener('keyup', (event) => {
   butUp(event.code);
+  if(event.code == p1Key) {
+    b1Held = false;
+  }
+  else if(event.code == p2Key) {
+    b2Held = false;
+  }
 }, false);
 
 
