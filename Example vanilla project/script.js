@@ -7,6 +7,8 @@ const groundWt = 962 ;
 var curScore = 0
 var p1Key = "KeyQ";
 var p2Key = "KeyP";
+var b1Held = false;
+var b2Held = false;
 const gravity = 0.2;
 var game = true;
 var hiScore = localStorage.getItem('hiScore'); // Lagrer en highscore i nettleserens lokallagring. Lagres mellom økter på samme maskin, men ikke mellom enheter eller forskjellige nettlesere.
@@ -66,9 +68,16 @@ function hudComponent(width, height, sprite, startX, startY) {
   this.x = startX
   this.y = startY
   this.sprSheet = sprite;
-  this.update = function() { // function(isHeld) {
+  this.update = function(isHeld) { // function(isHeld) {
     var imgId = this.sprSheet
-    sx = 0 // set to this.width to get hilit button sprite
+    if(isHeld)
+    {
+      sx = this.width;
+    }
+    else{
+      sx = 0
+    }
+     // set to this.width to get hilit button sprite
     sy = 0 
     ctx.drawImage(document.getElementById(imgId), sx, sy,
 		  this.width, this.height, this.x, this.y,
@@ -250,7 +259,7 @@ function checkHiScore(thisscore) {
 }
 
 function updateGameArea() {
-  var x, height, minHeight, maxHeight;
+  var x;
   for (i = 0; i < obstacles.length; i += 1) {
     if (daxtrot.crashWith(obstacles[i])) {
       if(game) // kjøres ved game over, 1 gang
@@ -312,7 +321,6 @@ function updateGameArea() {
     obstacles[i].x += -3;
     obstacles[i].update();
     if (obstacles[i].sprSheet == "bird_spr") {
-      console.log("Bird speed: "+obstacles[i].speedY);
       obstacles[i].x += -1;
       obstacles[i].y += obstacles[i].speedY;
       if (obstacles[i].y < obstacles[i].minY || obstacles[i].y > obstacles[i].maxY)
@@ -356,8 +364,8 @@ function updateGameArea() {
     player1.button = false;
     player2.button = false;
   }
-  but1.update();
-  but2.update();
+  but1.update(b1Held);
+  but2.update(b2Held);
 }
 
 function everyinterval(n) {
@@ -406,6 +414,16 @@ function butUp(keycode) {
   }
 }
 
+function butDown(keycode) {
+  // Her lagres verdi for om en knapp holdes nede - gjeninnførte for å bruke spriteupdate på knappene 10.11 -Petter
+  if(keycode == p1Key) {
+    b1Held = true;
+  }
+  else if(keycode == p2Key) {
+    b2Held = true;
+  }
+}
+
 // Hoppefunksjon, y-verdi, oppover
 function accelY(piece, n) {
   piece.speedY -= n;
@@ -417,13 +435,19 @@ function accelX(piece, n) {
 }
 
 // Keydown-sjekker
-// document.addEventListener('keydown', (event) => {
-//   butDown(event.code);
-// }, false);  
+document.addEventListener('keydown', (event) => {
+  butDown(event.code);
+}, false);  
 
 // Keyup-sjekker
 document.addEventListener('keyup', (event) => {
   butUp(event.code);
+  if(event.code == p1Key) {
+    b1Held = false;
+  }
+  else if(event.code == p2Key) {
+    b2Held = false;
+  }
 }, false);
 
 
