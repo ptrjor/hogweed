@@ -285,8 +285,7 @@ function updateGameArea() {
   var buttonInterval = 20 // reset button status every N frames
   let groundInterval = (groundWt / 4).toFixed(0) // spawn unending ground tiles
   var paralaxInterval = 12 // scroll background
-  hinderInterval = Math.floor(Math.random() * 100) + 200 // spawn hinder
-  bg.update()
+  bg.update();
   gameArea.frameNo += 1;
   // scroll background, increment score
   if (gameArea.frameNo == 1 || everyinterval(groundInterval)) {
@@ -337,27 +336,9 @@ function updateGameArea() {
   // Hadde vært fint å hardkode et level med varierende obstacles,
   // men dette er allerede spillbart som "endless runner"
   if (gameArea.frameNo == 1 || everyinterval(hinderInterval)) {
-    spawnType = Math.floor(Math.random() * 2) // which type of hinder
-    if (spawnType == 0) {
-      let x = gameArea.canvas.width;
-      let y = rockbottom - 55
-      obstacles.push(new sprComponent(64, 64, "hinder_spr", 5, 1, x, y));
-    }
-    else if (spawnType == 1) {
-      let x = gameArea.canvas.width;
-      let y = rockbottom - (100 + Math.floor(Math.random() *400))
-      nuObs=new sprComponent(54, 36, "bird_spr", 5, 4, x, y);
-      // attributes to fly up and down
-      let sverve = ((rockbottom - 60) - y) / 2
-      nuObs.maxY = y + sverve
-      nuObs.minY = y - sverve
-      if (nuObs.minY < 10) {
-        nuObs.minY = 10;
-      }
-      if (Math.floor(Math.random() * 1)) { nuObs.speedY = -2; }
-      else { nuObs.speedY = 2; }
-      obstacles.push(nuObs)
-    }
+    x = gameArea.canvas.width;
+    y = rockbottom - 55;
+    obstacles.push(new sprComponent(64, 64, "hinder_spr", 5, 1, x, y));
   }
   // reset button status
   if (everyinterval(buttonInterval)) {
