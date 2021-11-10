@@ -197,6 +197,15 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
     else { // piece is in the air, apply gravity
       if (this.y < 1) { // make sure we don't leave screen at top
 	this.y = 1;
+        if (this.speedY < 0) {
+          this.speedY = 1;
+        }
+      }
+      if (this.x < 1) { // make sure we don't leave screen to the left
+	this.x = 1;
+        if (this.speedX < 0) {
+          this.speedX = 0;
+        }
       }
       accelY(this,-gravity)
     }
@@ -363,9 +372,17 @@ function butUp(keycode) {
     pThis = player1; 
     pOther = player2; 
   }
+  else if(keycode == p1Key && player1.onGround()) {
+    player1.speedY = -9;
+    return;
+  }
   else if(keycode == p2Key && player2.onHound()) {
     pThis = player2;
     pOther = player1;
+  }
+  else if(keycode == p2Key && player2.onGround()) {
+    player2.speedY = -9;
+    return;
   }
   else {
     return
