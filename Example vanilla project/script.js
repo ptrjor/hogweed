@@ -184,7 +184,7 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
             for (let i = 20; this.crashWith(player1); true)
               player1.x += i; }
         }
-        else { // player jump on on daxtrot from right side
+        else { // player jump on daxtrot from right side
           this.x -= this.width * 1.25
           if (this == player1 && this.crashWith(player2)) {
             for (let i = 20; this.crashWith(player2); true)
@@ -201,11 +201,23 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
     {
       this.y = daxtrot.y - (this.height / 1.5) + daxtrot.sprBorder
       this.speedY = daxtrot.speedY;
-      this.speedX = daxtrot.speedX;      
+      this.speedX = daxtrot.speedX;
+      if (this.sprReel != 0) {
+        this.sprReel = 1;
+      }
     }
     else { // piece is in the air, apply gravity
       if (this.y < 1) { // make sure we don't leave screen at top
 	this.y = 1;
+        if (this.speedY < 0) {
+          this.speedY = 1;
+        }
+      }
+      if (this.x < 1) { // make sure we don't leave screen to the left
+	this.x = 1;
+        if (this.speedX < 0) {
+          this.speedX = 0;
+        }
       }
       accelY(this,-gravity)
     }
@@ -259,7 +271,17 @@ function updateGameArea() {
         game = false
       }
       return;
-    } 
+    }
+    else if(obstacles[i].sprSheet == "bird_spr") {
+      if (obstacles[i].crashWith(player1)) {
+        player1.speedY = -3;
+        player1.speedX = -5;
+      }
+      if (obstacles[i].crashWith(player2)) {
+        player2.speedY = -3;
+        player2.speedX = -5;
+      }
+    }
   }
   gameArea.clear();
   var scoreInterval = 6 // increment score every N frames
@@ -301,6 +323,14 @@ function updateGameArea() {
   for (i = 0; i < obstacles.length; i += 1) {
     obstacles[i].x += -3;
     obstacles[i].update();
+    if (obstacles[i].sprSheet == "bird_spr") {
+      obstacles[i].x += -1;
+      obstacles[i].y += obstacles[i].speedY;
+      if (obstacles[i].y < obstacles[i].minY || obstacles[i].y > obstacles[i].maxY)
+      {
+        obstacles[i].speedY = - obstacles[i].speedY;
+      }
+    }
   }
   // move daxtrot and players
   daxtrot.newPos(); daxtrot.update();
@@ -311,9 +341,27 @@ function updateGameArea() {
   // men dette er allerede spillbart som "endless runner", eventuelt sett
   // random verdi til hinderInterval for litt variasjon
   if (gameArea.frameNo == 1 || everyinterval(hinderInterval)) {
-    x = gameArea.canvas.width;
-    y = rockbottom - 55;
-    obstacles.push(new sprComponent(64, 64, "hinder_spr", 5, 1, x, y));
+    spawnType = Math.floor(Math.random() * 2) // which type of hinder
+    if (spawnType == 0) {
+      let x = gameArea.canvas.width;
+      let y = rockbottom - 55
+      obstacles.push(new sprComponent(64, 64, "hinder_spr", 5, 1, x, y));
+    }
+    else if (spawnType == 1) {
+      let x = gameArea.canvas.width;
+      let y = rockbottom - (100 + Math.floor(Math.random() *400))
+      nuObs=new sprComponent(54, 36, "bird_spr", 5, 4, x, y);
+      // attributes to fly up and down
+      let sverve = ((rockbottom - 60) - y) / 2
+      nuObs.maxY = y + sverve
+      nuObs.minY = y - sverve
+      if (nuObs.minY < 10) {
+        nuObs.minY = 10;
+      }
+      if (Math.floor(Math.random() * 1)) { nuObs.speedY = -2; }
+      else { nuObs.speedY = 2; }
+      obstacles.push(nuObs)
+    }
   }
   // reset button status
   if (everyinterval(buttonInterval)) {
@@ -336,9 +384,17 @@ function butUp(keycode) {
     pThis = player1; 
     pOther = player2; 
   }
+  else if(keycode == p1Key && player1.onGround()) {
+    player1.speedY = -9;
+    return;
+  }
   else if(keycode == p2Key && player2.onHound()) {
     pThis = player2;
     pOther = player1;
+  }
+  else if(keycode == p2Key && player2.onGround()) {
+    player2.speedY = -9;
+    return;
   }
   else {
     return
@@ -348,18 +404,14 @@ function butUp(keycode) {
   console.log("Status of other player.button: "+pOther.button)
   pThis.button = true
   if (pOther.button == true && daxtrot.onGround()) {
-    console.log("  Status of this player.button: "+pThis.button)
-    console.log("  Status of other player.button: "+pOther.button)
     // both players pushed button, make daxtrot jump
     pThis.button = false;
     pOther.button = false;
     // pOther just jumped, make sure both stay on dax
     pOther.y = daxtrot.y - (pOther.height / 1.5)
     pOther.speedY = 0
-    console.log("Dax cur speed X/Y: "+daxtrot.speedX+"/"+daxtrot.speedY);
     daxtrot.speedY = -9;
     daxtrot.speedX = 3;
-    console.log("Dax jump speed X/Y: "+daxtrot.speedX+"/"+daxtrot.speedY);
     return;
   }
   // check player jumps
