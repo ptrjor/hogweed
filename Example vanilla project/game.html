@@ -3,24 +3,34 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="style.css">
+    <title>Daxtrot</title>
   </head>
   <body onload="startGame()">
     <script src="script.js"></script>
-    <br>
-    <center>
-      <ul>
-	<h1>Daxtrot Prototype</h1>
-	<br>
-	<p>Bring the daxtrot to the end!</p>
-	
-	<p><h3>Controls</h3></p>
-        <p id="p1">Player 1: Q</p>
-        <p id="p2">Player 2: P</p>
-      </ul>
-    </center>
+        <div id="mySidenav" class="sidenav">
+          <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+          <a href="index.html">Hjem</a>
+          <a href="game.html">Spill</a>
+          <a href="https://folk.ntnu.no/simebh/hogweed/daxtrot/index.html">Idé (ekstern)</a>
+          <a href="#">Om oss</a>
+          <img src="assets/hogweed.png"> 
+        </div>
+        <span id="navigasjon" onclick="openNav()">&#9776; Meny</span>
+        <div class="flex" id="spilldiv">
+            <div>
+              <text class="bold">Daxtrot Prototype</text><br><br>
+              Bring the daxtrot to the end!
+            </div>
+            <div>
+              <text class="bold">Controls</text><br><br>
+              <text id="p1">Player 1: Q</text><br><br>
+              <text id="p2">Player 2: P</text>
+            </div>       
+        </div>         
+        
     <!-- ugly, hvis vi ikke plasserer element med id "daxtrot" på
     siden, får vi ingen sprites -->
-    <img id="bg_spr" src="assets/examplebackground.png"></img>
+    <img width="100%" id="bg_spr" src="assets/examplebackground.png"></img>
     <img id="ground_spr" src="assets/rock_ground.png"></img>
     <img id="daxtrot_spr" src="assets/dax.png"></img>
     <img id="player1_spr" src="assets/player_1.png"></img>

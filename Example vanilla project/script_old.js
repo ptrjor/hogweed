@@ -5,9 +5,16 @@ var obstacles = [];
 var ground_tiles = [] ;
 const groundWt = 962 ;
 var curScore = 0
+var b1Held = false;
+var b2Held = false;
+var b1Release = false;
+var b2Release = false;
 var p1Key = "KeyQ";
 var p2Key = "KeyP";
 const gravity = 0.2;
+// var p1OnHound = false;
+// var p2OnHound = false;
+// var onHound = false;
 var game = true;
 var hiScore = localStorage.getItem('hiScore'); // Lagrer en highscore i nettleserens lokallagring. Lagres mellom økter på samme maskin, men ikke mellom enheter eller forskjellige nettlesere.
 
@@ -31,8 +38,7 @@ var gameArea = {
     this.canvas.height = 720;
     this.canvas.style = "padding: 0; margin: auto; display: block; width: 1000px; height: 560px;";
     this.context = this.canvas.getContext("2d");
-    document.body.insertBefore(this.canvas, document.getElementById("spilldiv"));  
-    // Her settes spillcanvas inn før en div kalt spilldiv, slik at vi kan endre plasseringen av spillet på nettsiden
+    document.body.insertBefore(this.canvas, document.body.childNodes[0]);
     this.frameNo = 0;
     this.interval = setInterval(updateGameArea, 20);
     rockbottom = gameArea.canvas.height - 90;
@@ -65,9 +71,14 @@ function hudComponent(width, height, sprite, startX, startY) {
   this.x = startX
   this.y = startY
   this.sprSheet = sprite;
-  this.update = function() { // function(isHeld) {
+  this.update = function(isHeld) {
     var imgId = this.sprSheet
-    sx = 0 // set to this.width to get hilit button sprite
+    if (isHeld) {
+      var sx = this.width;
+    }
+    else {
+      var sx = 0;
+    }
     sy = 0 
     ctx.drawImage(document.getElementById(imgId), sx, sy,
 		  this.width, this.height, this.x, this.y,
@@ -91,8 +102,6 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
   this.speedY = 0;    
   this.x = startX;
   this.y = startY;
-  // button status (for players)
-  this.button = false // set true when button pushed
   this.crashWith = function(otherobj) {
     var myleft = this.x + this.sprBorder;
     var mytop = this.y + this.sprBorder ;
@@ -102,10 +111,15 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
     var otherright = otherobj.x + otherobj.width - otherobj.sprBorder;
     var othertop = otherobj.y + otherobj.sprBorder;
     var otherbottom = otherobj.y + otherobj.height - otherobj.sprBorder;
-    var crash = otherobj;
+    var crash = true;
     if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
       crash = false;
     }
+    // else {
+    //   console.log("CRASH ",this.sprSheet,myleft,mytop,myright,mybottom)
+    //   console.log("WITH ",otherobj.sprSheet,otherleft,othertop,otherright,otherbottom);
+    // }
+
     return crash;
   }
 
@@ -129,42 +143,29 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
 
   this.applyGravity = function() {
     if (this.onGround() && this.speedY > -1) {
-    // this is running along the ground
+      // piece is on bottom ground, stop there.
       this.y = rockbottom - this.height + this.sprBorder;
-      this.speedY = 0; // don't fall through ground
-      if (this == daxtrot) { // regulate speed if this is daxtrot
-        if(this.x > 20) { // fall back to left of screen
-          this.speedX = -2;
-          if (this.sprReel != 0) {
-            this.frame = 0;
-          }
-          this.sprReel = 0;
-        }
-        else { // cruising speed
-          this.speedX = 0;
-          if (this.sprReel != 1) {
-            this.frame = 0;
-          }
-          this.sprReel = 1;
-        }
-      }
-      else if (this.onHound() == false) { // player running off hound
+      this.speedY = 0;
+      if (this.onHound() == false) {
         if(this.x < daxtrot.x) {
-          this.speedX = 4;
-          if (this.sprReel != 1) { // switch to running animation
+          this.speedX = 5;
+          // switch to running animation
+          if (this.sprReel != 1) {
             this.sprFrame = 0; }
           this.sprReel = 1;
         }
         else if (this.x > daxtrot.x) {
-          this.speedX = -4;
-          if (this.sprReel != 2) { // run left animation
+          this.speedX = -5;
+          // run left animation
+          if (this.sprReel != 2) {
             this.sprFrame = 0; }
           this.sprReel = 2;
+          console.log("swtich anim.")
         }
       }
       else { // onGround && onHound
-        this.y = daxtrot.y - (this.height / 1.5) + daxtrot.sprBorder
-        if (this.x < daxtrot.x) { // coming from left
+        this.y = daxtrot.y // jump back up
+        if (this.x < daxtrot.x) {
           this.x += this.width * 1.25
           // push other player forward if overlapping position
           if (this == player1 && this.crashWith(player2)) {
@@ -174,8 +175,9 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
             for (let i = 20; this.crashWith(player1); true)
               player1.x += i; }
         }
-        else { // player jump on on daxtrot from right side
+        else {
           this.x -= this.width * 1.25
+          // push other player back if overlapping position
           if (this == player1 && this.crashWith(player2)) {
             for (let i = 20; this.crashWith(player2); true)
               player2.x -= i; }
@@ -189,7 +191,7 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
     }
     else if (this.onHound() && this.sprSheet != 'daxtrot' && this.speedY > -1)
     {
-      this.y = daxtrot.y - (this.height / 1.5) + daxtrot.sprBorder
+      this.y = daxtrot.y - this.height / 2 + daxtrot.sprBorder
       this.speedY = daxtrot.speedY;
       this.speedX = daxtrot.speedX;      
     }
@@ -207,15 +209,17 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
     this.applyGravity();
   }
 
-  this.update = function() { // draw current sprite frame
+  this.update = function() {
     ctx = gameArea.context;
-    if (this.frameLen) { // this is a sprite with animation frames
+    // draw current sprite frame
+    if (this.frameLen) { // this is a sprite with frame
       if (everyinterval(7)) {
         this.sprFrame+=1 // to next animation frame
         if (this.sprFrame >= this.frameLen) { // cycle animation
           this.sprFrame = 0;
         }
       }
+      // else if (this.sprSheet == 'bg_spr' && gameArea.frameNo / 60 % 1 == 0) …
       var imgId = this.sprSheet
       var sx = this.width * this.sprFrame
       var sy = this.height * this.sprReel
@@ -235,7 +239,7 @@ function checkHiScore(thisscore) {
   }
   else
   {
-    return "No highscore this time. ";
+    return "No highscore this time. "
   }
 }
 
@@ -255,7 +259,7 @@ function updateGameArea() {
   }
   gameArea.clear();
   var scoreInterval = 6 // increment score every N frames
-  var buttonInterval = 20 // reset button status every N frames
+  var buttonInterval = 15 // check button status every N frames
   var hinderInterval = 400 // spawn hinder every N frames
   let groundInterval = (groundWt / 4).toFixed(0) // spawn unending ground tiles
   var paralaxInterval = 12 // scroll background
@@ -276,11 +280,11 @@ function updateGameArea() {
   myScore.update()
   // scroll ground and obstacles
   for (i = 0; i < ground_tiles.length; i+= 1) {
-    ground_tiles[i].x -= 3 ;
+    ground_tiles[i].x -= 2 ;
     ground_tiles[i].update();
   }
   for (i = 0; i < obstacles.length; i += 1) {
-    obstacles[i].x += -3;
+    obstacles[i].x += -2;
     obstacles[i].update();
   }
   // move daxtrot and players
@@ -288,21 +292,18 @@ function updateGameArea() {
   player1.newPos(); player1.update();
   player2.newPos(); player2.update();
   // spawn new obstacles
-  // Hadde vært fint å hardkode et level med varierende obstacles,
-  // men dette er allerede spillbart som "endless runner", eventuelt sett
-  // random verdi til hinderInterval for litt variasjon
   if (gameArea.frameNo == 1 || everyinterval(hinderInterval)) {
+    // testing ; vi bør ha hardkoda level outlays
     x = gameArea.canvas.width;
     y = rockbottom - 55
     obstacles.push(new sprComponent(64, 64, "hinder_spr", 5, 1, x, y));
   }
-  // reset button status
-  if (everyinterval(buttonInterval)) {
-    player1.button = false;
-    player2.button = false;
+  // check button status after update, and draw button sprites
+  if (gameArea.frameNo == 1 || everyinterval(buttonInterval)) {
+    checkButtons()
   }
-  but1.update();
-  but2.update();
+  but1.update(b1Held);
+  but2.update(b2Held);
 }
 
 function everyinterval(n) {
@@ -310,91 +311,82 @@ function everyinterval(n) {
   return false;
 }
 
-function butUp(keycode) {
-  var pThis // which player just pressed their button
-  var pOther // reference other player here
-  if(keycode == p1Key && player1.onHound()) {
-    pThis = player1; 
-    pOther = player2; 
-  }
-  else if(keycode == p2Key && player2.onHound()) {
-    pThis = player2;
-    pOther = player1;
-  }
-  else {
-    return
-    console.log("Pressed button: "+keycode);
-  }
-  console.log(pThis.sprSheet+" pressed button")
-  console.log("Status of this player.button: "+pThis.button)
-  console.log("Status of other player.button: "+pOther.button)
-  pThis.button = true
-  if (pOther.button == true && daxtrot.onGround()) {
-    console.log("  Status of this player.button: "+pThis.button)
-    console.log("  Status of other player.button: "+pOther.button)
-    // both players pushed button, make daxtrot jump
-    pThis.button = false;
-    pOther.button = false;
-    // pOther just jumped, make sure both stay on dax
-    pOther.y = daxtrot.y - (pOther.height / 1.5)
-    pOther.speedY = 0
+function checkButtons() { // check if anyone are jumping
+  // check daxtrot jump
+  if (b1Release && b2Release && daxtrot.onGround() && player1.onHound() && player2.onHound()) { 
+    b1Held = false;
+    b2Held = false;
+    b1Release = false;
+    b2Release = false;
     console.log("Dax cur speed X/Y: "+daxtrot.speedX+"/"+daxtrot.speedY);
     daxtrot.speedY = -9;
-    daxtrot.speedX = 3;
     console.log("Dax jump speed X/Y: "+daxtrot.speedX+"/"+daxtrot.speedY);
     return;
   }
   // check player jumps
-  if (pThis.onHound()) { 
-    // console.log("p1 cur speed X/Y: "+pThis.speedX+"/"+player1.speedY);
-    pThis.speedY = -9;
-    pThis.speedX = 3;
-    // console.log("p1 jump speed X/Y: "+pThis.speedX+"/"+player1.speedY);
+  if(b1Release) {
+    b1Held = false;
+    b1Release = false;
+    if (player1.onHound()) {
+      console.log("p1 cur speed X/Y: "+player1.speedX+"/"+player1.speedY);
+      player1.speedY = -9;
+      console.log("p1 jump speed X/Y: "+player1.speedX+"/"+player1.speedY);
+    }
   }
-  // if(b2Release) {
-  //   b2Held = false;
-  //   b2Release = false;
-  //   if (player2.onHound()) {
-  //     console.log("p2 cur speed X/Y: "+player2.speedX+"/"+player2.speedY);
-  //     player2.speedY = -9;
-  //     console.log("p2 jump speed X/Y: "+player2.speedX+"/"+player2.speedY);
-  //   }
-  // }
-  // // check daxtrot speed
-  // if (daxtrot.onGround && daxtrot.speedY == 0) {
-  //   daxtrot.speedX = 0;
-  //   if (b1Held && b2Held && player1.onHound() && player2.onHound()) {
-  //     daxtrot.speedX = 3;
-  //     // running animation
-  //     if (daxtrot.sprReel != 1) { daxtrot.sprFrame = 0; }
-  //     daxtrot.sprReel = 1
-  //   }
-  //   else if (((b1Held && player1.onHound()) || (b2Held && player2.onHound)) && daxtrot.x > 20 && daxtrot.onGround()) {
-  //     daxtrot.speedX = -3;
-  //     // trot left animation
-  //     if (daxtrot.sprReel != 2) { daxtrot.sprFrame = 0; }
-  //     daxtrot.sprReel = 2;
-  //   }
-  //   else {
-  //     daxtrot.speedX = 0;
-  //     if (daxtrot.sprReel != 0) { daxtrot.sprFrame = 0; }
-  //     daxtrot.sprReel = 0;
-  //   }
-  // }
+  if(b2Release) {
+    b2Held = false;
+    b2Release = false;
+    if (player2.onHound()) {
+      console.log("p2 cur speed X/Y: "+player2.speedX+"/"+player2.speedY);
+      player2.speedY = -9;
+      console.log("p2 jump speed X/Y: "+player2.speedX+"/"+player2.speedY);
+    }
+  }
+  // check daxtrot speed
+  if (daxtrot.onGround && daxtrot.speedY == 0) {
+    daxtrot.speedX = 0;
+    if (b1Held && b2Held && player1.onHound() && player2.onHound()) {
+      daxtrot.speedX = 3;
+      // running animation
+      if (daxtrot.sprReel != 1) { daxtrot.sprFrame = 0; }
+      daxtrot.sprReel = 1
+    }
+    else if (((b1Held && player1.onHound()) || (b2Held && player2.onHound)) && daxtrot.x > 20 && daxtrot.onGround()) {
+      daxtrot.speedX = -3;
+      // trot left animation
+      if (daxtrot.sprReel != 2) { daxtrot.sprFrame = 0; }
+      daxtrot.sprReel = 2;
+    }
+    else {
+      daxtrot.speedX = 0;
+      if (daxtrot.sprReel != 0) { daxtrot.sprFrame = 0; }
+      daxtrot.sprReel = 0;
+    }
+  }
 }
 
-// function butDown(keycode) {
-//   // Her lagres verdi for om en knapp holdes nede
-//   if(keycode == p1Key) {
-//     b1Held = true;
-//   }
-//   else if(keycode == p2Key) {
-//     b2Held = true;
-//   }
-// }
+function butDown(keycode) {
+  // Her lagres verdi for om en knapp holdes nede
+  if(keycode == p1Key) {
+    b1Held = true;
+  }
+  else if(keycode == p2Key) {
+    b2Held = true;
+  }
+}
 
 // Kjøres om en av de designerte spilleknappene er trykt og slippes (keyup) 
 // Det er her vi må fikse på ting for å sørge for at ikke bare én spiller kan slippe knappen, så hopper daxtrot fortsatt.
+function butUp(keycode) {
+  if(keycode == p1Key) {
+    b1Release = true;
+    b1Held = false; 
+  }
+  else if(keycode == p2Key) {
+    b2Release = true;
+    b1Held = false; 
+  }
+}
   
 //   if (b1Held && b2Held && daxtrot.onGround() && player1.onhound && player2.onhound) {
 //     console.log("Bla")
@@ -434,25 +426,17 @@ function accelX(piece, n) {
   piece.speedX = n;
 }
 
-// Keydown-sjekker
+//Keydown-sjekker
 document.addEventListener('keydown', (event) => {
   butDown(event.code);
 }, false);  
 
-// Keyup-sjekker
+//Keyup-sjekker
 document.addEventListener('keyup', (event) => {
   butUp(event.code);
 }, false);
 
 
-// Nav-bar funksjoner
-function openNav() {
-  document.getElementById("mySidenav").style.width = "250px";
-}
-
-function closeNav() {
-  document.getElementById("mySidenav").style.width = "0";
-}
 
 
 
