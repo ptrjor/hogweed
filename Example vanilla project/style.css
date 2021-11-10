@@ -154,6 +154,17 @@ canvas {
     visibility: hidden;
 }
 
+#bird_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 36px;
+    width: 54px;
+    background-image: url(assets/bird.png);
+    visibility: hidden;
+}
+
 #daxtrot_spr
 {
     position: absolute;

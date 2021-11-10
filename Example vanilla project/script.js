@@ -243,22 +243,30 @@ function updateGameArea() {
   var x, height, minHeight, maxHeight;
   for (i = 0; i < obstacles.length; i += 1) {
     if (daxtrot.crashWith(obstacles[i])) {
-      console.log("AAA lkjsadf")
       if(game) // kjøres ved game over, 1 gang
       {
-        console.log("lkjsadf")
         alert("Game over. Your score: " + curScore + ". " + checkHiScore(curScore) + " Refresh the page to try again.")
         game = false
       }
       return;
-    } 
+    }
+    else if(obstacles[i].sprSheet == "bird_spr") {
+      if (obstacles[i].crashWith(player1)) {
+        player1.speedY = -3;
+        player1.speedX = -5;
+      }
+      if (obstacles[i].crashWith(player2)) {
+        player2.speedY = -3;
+        player2.speedX = -5;
+      }
+    }
   }
   gameArea.clear();
   var scoreInterval = 6 // increment score every N frames
   var buttonInterval = 20 // reset button status every N frames
-  var hinderInterval = 400 // spawn hinder every N frames
   let groundInterval = (groundWt / 4).toFixed(0) // spawn unending ground tiles
   var paralaxInterval = 12 // scroll background
+  hinderInterval = Math.floor(Math.random() * 100) + 200 // spawn hinder
   bg.update()
   gameArea.frameNo += 1;
   // scroll background, increment score
@@ -282,6 +290,15 @@ function updateGameArea() {
   for (i = 0; i < obstacles.length; i += 1) {
     obstacles[i].x += -3;
     obstacles[i].update();
+    if (obstacles[i].sprSheet == "bird_spr") {
+      console.log("Bird speed: "+obstacles[i].speedY);
+      obstacles[i].x += -1;
+      obstacles[i].y += obstacles[i].speedY;
+      if (obstacles[i].y < obstacles[i].minY || obstacles[i].y > obstacles[i].maxY)
+      {
+        obstacles[i].speedY = - obstacles[i].speedY;
+      }
+    }
   }
   // move daxtrot and players
   daxtrot.newPos(); daxtrot.update();
@@ -289,12 +306,29 @@ function updateGameArea() {
   player2.newPos(); player2.update();
   // spawn new obstacles
   // Hadde vært fint å hardkode et level med varierende obstacles,
-  // men dette er allerede spillbart som "endless runner", eventuelt sett
-  // random verdi til hinderInterval for litt variasjon
+  // men dette er allerede spillbart som "endless runner"
   if (gameArea.frameNo == 1 || everyinterval(hinderInterval)) {
-    x = gameArea.canvas.width;
-    y = rockbottom - 55
-    obstacles.push(new sprComponent(64, 64, "hinder_spr", 5, 1, x, y));
+    spawnType = Math.floor(Math.random() * 2) // which type of hinder
+    if (spawnType == 0) {
+      let x = gameArea.canvas.width;
+      let y = rockbottom - 55
+      obstacles.push(new sprComponent(64, 64, "hinder_spr", 5, 1, x, y));
+    }
+    else if (spawnType == 1) {
+      let x = gameArea.canvas.width;
+      let y = rockbottom - (100 + Math.floor(Math.random() *400))
+      nuObs=new sprComponent(54, 36, "bird_spr", 5, 4, x, y);
+      // attributes to fly up and down
+      let sverve = ((rockbottom - 60) - y) / 2
+      nuObs.maxY = y + sverve
+      nuObs.minY = y - sverve
+      if (nuObs.minY < 10) {
+        nuObs.minY = 10;
+      }
+      if (Math.floor(Math.random() * 1)) { nuObs.speedY = -2; }
+      else { nuObs.speedY = 2; }
+      obstacles.push(nuObs)
+    }
   }
   // reset button status
   if (everyinterval(buttonInterval)) {
@@ -323,106 +357,25 @@ function butUp(keycode) {
   }
   else {
     return
-    console.log("Pressed button: "+keycode);
   }
-  console.log(pThis.sprSheet+" pressed button")
-  console.log("Status of this player.button: "+pThis.button)
-  console.log("Status of other player.button: "+pOther.button)
   pThis.button = true
   if (pOther.button == true && daxtrot.onGround()) {
-    console.log("  Status of this player.button: "+pThis.button)
-    console.log("  Status of other player.button: "+pOther.button)
     // both players pushed button, make daxtrot jump
     pThis.button = false;
     pOther.button = false;
     // pOther just jumped, make sure both stay on dax
     pOther.y = daxtrot.y - (pOther.height / 1.5)
     pOther.speedY = 0
-    console.log("Dax cur speed X/Y: "+daxtrot.speedX+"/"+daxtrot.speedY);
     daxtrot.speedY = -9;
     daxtrot.speedX = 3;
-    console.log("Dax jump speed X/Y: "+daxtrot.speedX+"/"+daxtrot.speedY);
     return;
   }
   // check player jumps
   if (pThis.onHound()) { 
-    // console.log("p1 cur speed X/Y: "+pThis.speedX+"/"+player1.speedY);
     pThis.speedY = -9;
     pThis.speedX = 3;
-    // console.log("p1 jump speed X/Y: "+pThis.speedX+"/"+player1.speedY);
   }
-  // if(b2Release) {
-  //   b2Held = false;
-  //   b2Release = false;
-  //   if (player2.onHound()) {
-  //     console.log("p2 cur speed X/Y: "+player2.speedX+"/"+player2.speedY);
-  //     player2.speedY = -9;
-  //     console.log("p2 jump speed X/Y: "+player2.speedX+"/"+player2.speedY);
-  //   }
-  // }
-  // // check daxtrot speed
-  // if (daxtrot.onGround && daxtrot.speedY == 0) {
-  //   daxtrot.speedX = 0;
-  //   if (b1Held && b2Held && player1.onHound() && player2.onHound()) {
-  //     daxtrot.speedX = 3;
-  //     // running animation
-  //     if (daxtrot.sprReel != 1) { daxtrot.sprFrame = 0; }
-  //     daxtrot.sprReel = 1
-  //   }
-  //   else if (((b1Held && player1.onHound()) || (b2Held && player2.onHound)) && daxtrot.x > 20 && daxtrot.onGround()) {
-  //     daxtrot.speedX = -3;
-  //     // trot left animation
-  //     if (daxtrot.sprReel != 2) { daxtrot.sprFrame = 0; }
-  //     daxtrot.sprReel = 2;
-  //   }
-  //   else {
-  //     daxtrot.speedX = 0;
-  //     if (daxtrot.sprReel != 0) { daxtrot.sprFrame = 0; }
-  //     daxtrot.sprReel = 0;
-  //   }
-  // }
 }
-
-// function butDown(keycode) {
-//   // Her lagres verdi for om en knapp holdes nede
-//   if(keycode == p1Key) {
-//     b1Held = true;
-//   }
-//   else if(keycode == p2Key) {
-//     b2Held = true;
-//   }
-// }
-
-// Kjøres om en av de designerte spilleknappene er trykt og slippes (keyup) 
-// Det er her vi må fikse på ting for å sørge for at ikke bare én spiller kan slippe knappen, så hopper daxtrot fortsatt.
-  
-//   if (b1Held && b2Held && daxtrot.onGround() && player1.onhound && player2.onhound) {
-//     console.log("Bla")
-//     accelY(daxtrot, 9); 
-//     accelY(player1, 9); 
-//     accelY(player2, 9); 
-//     p1OnHound = false;
-//     p2OnHound = false;       
-//     } 
-//   else if(b1Held)
-//   {
-//       if(p1OnHound)
-//       {
-//           accelY(player1, 6);
-//           p1OnHound = false;
-//         }
-//     }
-//   else if(b2Held)
-//   {
-//       if(p2OnHound)
-//       {   
-//           accelY(player2, 6);
-//           p2OnHound = false;
-//       }
-//   }
-//   b1Held = false;
-//   b2Held = false;
-// }
 
 // Hoppefunksjon, y-verdi, oppover
 function accelY(piece, n) {
@@ -435,9 +388,9 @@ function accelX(piece, n) {
 }
 
 // Keydown-sjekker
-document.addEventListener('keydown', (event) => {
-  butDown(event.code);
-}, false);  
+// document.addEventListener('keydown', (event) => {
+//   butDown(event.code);
+// }, false);  
 
 // Keyup-sjekker
 document.addEventListener('keyup', (event) => {
@@ -453,6 +406,3 @@ function openNav() {
 function closeNav() {
   document.getElementById("mySidenav").style.width = "0";
 }
-
-
-
