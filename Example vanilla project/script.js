@@ -1,5 +1,5 @@
 var daxtrot, p1, p2, ground, bg;
-var myScore;
+var myScore, hiscorecomponent, hscorecolor;
 var rockbottom
 var obstacles = [];
 var ground_tiles = [] ;
@@ -19,6 +19,7 @@ function startGame() {
   daxtrot = new sprComponent(256, 96, "daxtrot_spr", 20, 4, 10, 850);
   // obs = new sprComponent(64, 64, "hinder_spr", 1, 1, 700, 700);
   myScore = new txtComponent("30px", "Consolas", "black", 40, 40);
+  hiscorecomponent = new txtComponent("30px", "Consolas", "black", 980, 40);
   but1 = new hudComponent(56, 56, 'but1_spr', 10, gameArea.canvas.height-60);
   but2 = new hudComponent(56, 56,'but2_spr',
                           gameArea.canvas.width-66,gameArea.canvas.height-60);
@@ -51,10 +52,10 @@ function txtComponent(width, height, color, x, y) {
   this.height = height;
   this.x = x;
   this.y = y;
-  this.update = function() {
+  this.update = function(hscorecolor) {
     ctx = gameArea.context;
     ctx.font = this.width + " " + this.height;
-    ctx.fillStyle = color;
+    ctx.fillStyle = hscorecolor;
     ctx.fillText(this.text, this.x, this.y);
   };
 }
@@ -280,8 +281,19 @@ function updateGameArea() {
   if (gameArea.frameNo == 1 || everyinterval(paralaxInterval)) {
     bg.x -= 1;
   }
-  myScore.text="SCORE: " + curScore
-  myScore.update()
+  myScore.text="SCORE: " + curScore;
+  myScore.update();
+  if(curScore>hiScore){
+    hscorecolor = "red";
+    hiscorecomponent.text="High Score: " + curScore;
+    hiscorecomponent.update(hscorecolor);
+  }
+  else{
+    hscorecolor = "black";
+    hiscorecomponent.text="High Score: " + hiScore;
+    hiscorecomponent.update();
+  }
+  
   // scroll ground and obstacles
   for (i = 0; i < ground_tiles.length; i+= 1) {
     ground_tiles[i].x -= 3 ;
