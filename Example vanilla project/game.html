@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
     <link rel="stylesheet" href="style.css">
     <title>Daxtrot</title>
   </head>
@@ -15,21 +15,22 @@
           <a href="#">Om oss</a>
           <img src="assets/hogweed.png"> 
         </div>
-        <span id="navigasjon" onclick="openNav()">&#9776; Meny</span>
-        <div class="flex" id="spilldiv">
-            <div>
+        <div id="spandiv"><span id="navigasjon" onclick="openNav()">&#9776; Meny</span></div>
+        <div class="flex" id="spilldiv"></div> 
+        <div class="grid-container">
+            <div class="grid-item" id="titlediv">
               <text class="bold">Daxtrot Prototype</text><br><br>
               Bring the daxtrot to the end!
             </div>
-            <div>
+            <div class="grid-item" id="controlsdiv">
               <text class="bold">Controls</text><br><br>
               <text id="p1">Player 1: Q</text><br><br>
               <text id="p2">Player 2: P</text>
             </div>       
-        </div>         
+          </div>    
         
     <!-- prepare sprites -->
-    <img width="100%" id="bg_spr" src="assets/examplebackground.png"></img>
+    <img id="bg_spr" src="assets/examplebackground.png"></img>
     <img id="ground_spr" src="assets/rock_ground.png"></img>
     <img id="daxtrot_spr" src="assets/dax.png"></img>
     <img id="player1_spr" src="assets/player_1.png"></img>
@@ -37,7 +38,9 @@
     <img id="hinder_spr" src="assets/hinder.png"></img>
     <img id="bird_spr" src="assets/bird.png"></img>
     <img id="but1_spr" src="assets/button1.png"></img>
+    <img id="but1big_spr" src="assets/button1_big.png"></img>
     <img id="but2_spr" src="assets/button2.png"></img>
+    <img id="but2big_spr" src="assets/button2_big.png"></img>
   </body>
 </html>
 

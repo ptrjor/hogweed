@@ -12,19 +12,36 @@ var b2Held = false;
 const gravity = 0.2;
 var game = true;
 var hiScore = localStorage.getItem('hiScore'); // Lagrer en highscore i nettleserens lokallagring. Lagres mellom økter på samme maskin, men ikke mellom enheter eller forskjellige nettlesere.
+var mobile = false;
 
 function startGame() {
+  if(screen.width<450){
+    document.getElementById("spilldiv").innerHTML = "Rotate screen and refresh to play.";
+    return
+  }
+  else if(screen.width>450 && screen.width<922){mobile=true} // Dette betyr at det sannsynligvis er en rotert mobilskjerm
+
   gameArea.start();
   bg = new sprComponent(2412, 810, "bg_spr", 0, 1, 1, 1);
   player1 = new sprComponent(62, 48, "player1_spr", 10, 7, 40, 400); 
   player2 = new sprComponent(62, 48, "player2_spr", 0, 7, 130, 400);
   daxtrot = new sprComponent(256, 96, "daxtrot_spr", 20, 4, 10, 850);
   // obs = new sprComponent(64, 64, "hinder_spr", 1, 1, 700, 700);
-  myScore = new txtComponent("30px", "Consolas", "black", 40, 40);
-  hiscorecomponent = new txtComponent("30px", "Consolas", "black", 980, 40);
-  but1 = new hudComponent(56, 56, 'but1_spr', 10, gameArea.canvas.height-60);
-  but2 = new hudComponent(56, 56,'but2_spr',
-                          gameArea.canvas.width-66,gameArea.canvas.height-60);
+  
+  
+
+  if(mobile){
+    hiscorecomponent = new txtComponent("40px", "Consolas", "black", 680, 40);
+    myScore = new txtComponent("40px", "Consolas", "black", 380, 40);
+    but1 = new hudComponent(168, 168, 'but1big_spr', 10, 10);
+    but2 = new hudComponent(168, 168,'but2big_spr', gameArea.canvas.width-180,10);
+  } else{
+    hiscorecomponent = new txtComponent("30px", "Consolas", "black", 980, 40);
+    myScore = new txtComponent("30px", "Consolas", "black", 40, 40);
+    but1 = new hudComponent(56, 56, 'but1_spr', 10, gameArea.canvas.height-60);
+    but2 = new hudComponent(56, 56,'but2_spr', gameArea.canvas.width-66,gameArea.canvas.height-60);
+  }
+  
 }
 
 var gameArea = {
@@ -32,7 +49,13 @@ var gameArea = {
   start : function() {
     this.canvas.width = 1280;
     this.canvas.height = 720;
-    this.canvas.style = "padding: 0; margin: auto; display: block; width: 1000px; height: 560px;";
+    this.canvas.style = "padding: 5px; margin: auto; display: block; width: 1000px; height: 560px;";
+    if(mobile){ 
+      document.getElementById("navigasjon").style = "position: absolute; font-size: 150%; top: 30%; margin-left: 100%; text-align: center;"
+      this.canvas.width = 1280;
+      this.canvas.height = 500;
+      this.canvas.style = "width: 100%";
+    } 
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.getElementById("spilldiv"));  
     // Her settes spillcanvas inn før en div kalt spilldiv, slik at vi kan endre plasseringen av spillet på nettsiden
@@ -267,7 +290,7 @@ function updateGameArea() {
     if (daxtrot.crashWith(obstacles[i])) {
       if(game) // kjøres ved game over, 1 gang
       {
-        alert("Game over. Your score: " + curScore + ". " + checkHiScore(curScore) + " Refresh the page to try again.")
+        console.log("Game over. Your score: " + curScore + ". " + checkHiScore(curScore) + " Refresh the page to try again.")
         game = false
       }
       return;
@@ -469,5 +492,14 @@ function closeNav() {
   document.getElementById("mySidenav").style.width = "0";
 }
 
+function getCursorPosition(canvas, event) {
+  const rect = canvas.getBoundingClientRect()
+  const x = event.clientX - rect.left
+  const y = event.clientY - rect.top
+  console.log("x: " + x + " y: " + y)
+}
 
+document.canvas.addEventListener('mousedown', function(e) {
+  getCursorPosition(canvas, e)
+})
 
