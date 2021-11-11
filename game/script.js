@@ -403,8 +403,8 @@ function everyinterval(n) {
 }
 
 function butUp(keycode) {
-  if(keycode==p1Key){b1Held=false;console.log("butup1 " + b1Held) ;but1.update(b1Held)}
-  if(keycode==p2Key){b2Held=false;console.log("butup2 " + b2Held) ;but2.update(b2Held)}
+  if(keycode==p1Key){b1Held=false;but1.update(b1Held)}
+  if(keycode==p2Key){b2Held=false;but2.update(b2Held)}
   var pThis // which player just pressed their button
   var pOther // reference other player here
   if(keycode == p1Key && player1.onHound()) {
@@ -531,16 +531,21 @@ function touchHandle(){
       }
   }
 
+  // Touchend event - dersom vi skulle trenge å holde inne knappene f.eks. siden de nå bare funker med 'tap'*/
+
 /*   window.addEventListener('touchend', handleEndtouch, false);
 
   function handleEndtouch(evt){
     evt.preventDefault();
     show.innerHTML = "tend";
   }
- // Touchend event - dersom vi skulle trenge å holde inne knappene f.eks. siden de nå bare funker med 'tap'*/
+ 
 
 
 
+
+   Klikkevent for samme greia. Brukes ikke nå, men i fall vi ønsker å bruke senere lagrer jeg den her
+   
   /* window.addEventListener('click', canvclick, false);
 
   function canvclick(e) {
@@ -569,5 +574,5 @@ function touchHandle(){
         x: (evt.clientX - rect.left) / (rect.right - rect.left) * canvas.width,
         y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
     };
-  } Klikkevent for samme greia. Brukes ikke nå, men i fall vi ønsker å bruke senere lagrer jeg den her */
+  }  */
 }
