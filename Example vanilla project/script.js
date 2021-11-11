@@ -12,19 +12,38 @@ var b2Held = false;
 const gravity = 0.2;
 var game = true;
 var hiScore = localStorage.getItem('hiScore'); // Lagrer en highscore i nettleserens lokallagring. Lagres mellom økter på samme maskin, men ikke mellom enheter eller forskjellige nettlesere.
+var mobile = false;
+var gamecanvas;
 
 function startGame() {
+  if(screen.width<450){
+    document.getElementById("spilldiv").innerHTML = "Rotate screen and refresh to play.";
+    return
+  }
+  else if(screen.width>450 && screen.width<922){mobile=true} // Dette betyr at det sannsynligvis er en rotert mobilskjerm
+
   gameArea.start();
+  gamecanvas = gameArea.canvas;
   bg = new sprComponent(2412, 810, "bg_spr", 0, 1, 1, 1);
   player1 = new sprComponent(62, 48, "player1_spr", 10, 7, 40, 400); 
   player2 = new sprComponent(62, 48, "player2_spr", 0, 7, 130, 400);
   daxtrot = new sprComponent(256, 96, "daxtrot_spr", 20, 4, 10, 850);
   // obs = new sprComponent(64, 64, "hinder_spr", 1, 1, 700, 700);
-  myScore = new txtComponent("30px", "Consolas", "black", 40, 40);
-  hiscorecomponent = new txtComponent("30px", "Consolas", "black", 980, 40);
-  but1 = new hudComponent(56, 56, 'but1_spr', 10, gameArea.canvas.height-60);
-  but2 = new hudComponent(56, 56,'but2_spr',
-                          gameArea.canvas.width-66,gameArea.canvas.height-60);
+  
+  
+
+  if(mobile){
+    hiscorecomponent = new txtComponent("40px", "Consolas", "black", 680, 40);
+    myScore = new txtComponent("40px", "Consolas", "black", 380, 40);
+    but1 = new hudComponent(168, 168, 'but1big_spr', 10, 10);
+    but2 = new hudComponent(168, 168,'but2big_spr', gameArea.canvas.width-180,10);
+  } else{
+    hiscorecomponent = new txtComponent("30px", "Consolas", "black", 980, 40);
+    myScore = new txtComponent("30px", "Consolas", "black", 40, 40);
+    but1 = new hudComponent(56, 56, 'but1_spr', 10, gameArea.canvas.height-60);
+    but2 = new hudComponent(56, 56,'but2_spr', gameArea.canvas.width-66,gameArea.canvas.height-60);
+  }
+  
 }
 
 var gameArea = {
@@ -32,7 +51,13 @@ var gameArea = {
   start : function() {
     this.canvas.width = 1280;
     this.canvas.height = 720;
-    this.canvas.style = "padding: 0; margin: auto; display: block; width: 1000px; height: 560px;";
+    this.canvas.style = "padding: 5px; margin: auto; display: block; width: 1000px; height: 560px;";
+    if(mobile){ 
+      document.getElementById("navigasjon").style = "position: absolute; font-size: 120%; top: 80%; margin-left: 103%; text-align: center;"
+      this.canvas.width = 1280;
+      this.canvas.height = 500;
+      this.canvas.style = "width: 100%";
+    } 
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.getElementById("spilldiv"));  
     // Her settes spillcanvas inn før en div kalt spilldiv, slik at vi kan endre plasseringen av spillet på nettsiden
@@ -267,7 +292,7 @@ function updateGameArea() {
     if (daxtrot.crashWith(obstacles[i])) {
       if(game) // kjøres ved game over, 1 gang
       {
-        alert("Game over. Your score: " + curScore + ". " + checkHiScore(curScore) + " Refresh the page to try again.")
+        console.log("Game over. Your score: " + curScore + ". " + checkHiScore(curScore) + " Refresh the page to try again.")
         game = false
       }
       return;
@@ -378,6 +403,8 @@ function everyinterval(n) {
 }
 
 function butUp(keycode) {
+  if(keycode==p1Key){b1Held=false;console.log("butup1 " + b1Held) ;but1.update(b1Held)}
+  if(keycode==p2Key){b2Held=false;console.log("butup2 " + b2Held) ;but2.update(b2Held)}
   var pThis // which player just pressed their button
   var pOther // reference other player here
   if(keycode == p1Key && player1.onHound()) {
@@ -430,6 +457,8 @@ function butDown(keycode) {
   else if(keycode == p2Key) {
     b2Held = true;
   }
+
+  if(mobile){butUp(keycode)}
 }
 
 
@@ -470,4 +499,75 @@ function closeNav() {
 }
 
 
+// Under er eventlistenere som gir mobil-touch funksjonalitet
 
+document.addEventListener("DOMContentLoaded", touchHandle);
+
+function touchHandle(){
+  window.addEventListener('touchstart', handleStarttouch, false);
+
+  function handleStarttouch(evt){
+    evt.preventDefault();
+    posx = evt.touches[0].clientX.toFixed(2);
+    posy = evt.touches[0].clientY.toFixed(2);
+
+    if(evt.targetTouches.length > 1) // Fyrer av hopp for begge knappene dersom det trykkes samtidig (uansett hvor)
+    {
+      butDown(p1Key)
+      but1.update(true)
+      butDown(p2Key)
+      but2.update(true)
+    }
+
+    if(posx>5 && posx<175 && posy<190 && posy>10) // P1 Hopp dersom Q klikkes
+      {
+        butDown(p1Key)
+        but1.update(true)
+      }
+      if(posx>660 && posx<810 && posy<155 && posy>10) // P2 Hopp dersom P klikkes
+      {
+        butDown(p2Key)
+        but2.update(true)
+      }
+  }
+
+/*   window.addEventListener('touchend', handleEndtouch, false);
+
+  function handleEndtouch(evt){
+    evt.preventDefault();
+    show.innerHTML = "tend";
+  }
+ // Touchend event - dersom vi skulle trenge å holde inne knappene f.eks. siden de nå bare funker med 'tap'*/
+
+
+
+  /* window.addEventListener('click', canvclick, false);
+
+  function canvclick(e) {
+    
+    var pos = getMousePos(gamecanvas, e);
+    posx = pos.x;
+    posy = pos.y;
+    
+    if(mobile){
+      if(posx>5 && posx<175 && posy<190 && posy>10)
+      {
+        butDown(p1Key)
+      }
+
+      if(posx>1100 && posx<1265 && posy<190 && posy>10)
+      {
+        butDown(p2Key)
+      }
+    }
+  }
+
+
+  function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: (evt.clientX - rect.left) / (rect.right - rect.left) * canvas.width,
+        y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
+    };
+  } Klikkevent for samme greia. Brukes ikke nå, men i fall vi ønsker å bruke senere lagrer jeg den her */
+}
