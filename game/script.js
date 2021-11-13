@@ -1,44 +1,91 @@
 var daxtrot, p1, p2, ground, bg;
 var myScore, hiscorecomponent, hscorecolor;
-var rockbottom
-var obstacles = [];
-var ground_tiles = [] ;
+var rockbottom;
+var obstacles, curScore, ground_tiles;
 const groundWt = 962 ;
-var curScore = 0
 var p1Key = "KeyQ";
 var p2Key = "KeyP";
 var b1Held = false;
 var b2Held = false;
 const gravity = 0.2;
-var game = true;
 var hiScore = localStorage.getItem('hiScore'); // Lagrer en highscore i nettleserens lokallagring. Lagres mellom økter på samme maskin, men ikke mellom enheter eller forskjellige nettlesere.
 var mobile = false;
-var gamecanvas;
+var lastscore, hitext;
+var k = 0;
+var c;
+var startscrn = true;
 
-function startGame() {
+function startScreen(scr, newHscore) {  
   if(screen.width<450){
     document.getElementById("spilldiv").innerHTML = "Rotate screen and refresh to play.";
     return
-  }
-  else if(screen.width>450 && screen.width<922){mobile=true} // Dette betyr at det sannsynligvis er en rotert mobilskjerm
+  } else if(screen.width>450 && screen.width<922){
+    mobile = true;
+    document.getElementById("navigasjon").style = "position: absolute; font-size: 120%; top: 40%; margin-left: 103%; text-align: center;";
+  } // Dette betyr at det sannsynligvis er en rotert mobilskjerm
 
-  gameArea.start();
-  gamecanvas = gameArea.canvas;
+  startscrn = true;
+  obstacles = [];
+  ground_tiles = [];
+  gameArea.frameNo = 0;
+  curScore = 0;
+
+  gameArea.start(startscrn);
   bg = new sprComponent(2412, 810, "bg_spr", 0, 1, 1, 1);
+  bg.update();
+  startbtn = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-150, gameArea.canvas.height/2);
+  startbtn.text = "Click to play";
+  startbtn.update()
+  
+  
+  console.log(hiScore)
+
+  if(scr>0) // Viser score du fikk på forrige forsøk, dersom du nettopp tapte. Vises ikke om du
+  {
+    
+   
+    if(mobile){
+      lastscore = new txtComponent("40px", "Consolas", "black", gameArea.canvas.width/2-250, 50);
+    } else{
+      lastscore = new txtComponent("40px", "Consolas", "black", 420, 150);
+    }
+
+    lastscore.text = "Game over. Score: " + scr;
+    hitext = new txtComponent("40px", "Consolas", "black", gameArea.canvas.width/2-250, gameArea.canvas.height/2-100);
+    hitext.text = newHscore;
+    
+    lastscore.update();
+    hitext.update();
+  }
+  c = gameArea.canvas;
+  c.addEventListener("click",handleclick,false);
+  
+}
+
+function handleclick(e){
+  e.preventDefault();
+  startGame();
+  c.removeEventListener("click",handleclick)
+}
+
+function startGame() {
+  startscrn = false;
+  gameArea.start(startscrn);
   player1 = new sprComponent(62, 48, "player1_spr", 10, 7, 40, 400); 
   player2 = new sprComponent(62, 48, "player2_spr", 0, 7, 130, 400);
   daxtrot = new sprComponent(256, 96, "daxtrot_spr", 20, 4, 10, 850);
-  // obs = new sprComponent(64, 64, "hinder_spr", 1, 1, 700, 700);
-  
-  
-
+  hiscorecomponent = new txtComponent("30px", "Consolas", "black", 980, 40);
   if(mobile){
-    hiscorecomponent = new txtComponent("40px", "Consolas", "black", 680, 40);
+    touchHandle();
+    hiscorecomponent.width = "40px";
+    hiscorecomponent.x = 680;
+    hiscorecomponent.y = 40;
     myScore = new txtComponent("40px", "Consolas", "black", 380, 40);
     but1 = new hudComponent(168, 168, 'but1big_spr', 10, 10);
     but2 = new hudComponent(168, 168,'but2big_spr', gameArea.canvas.width-180,10);
   } else{
-    hiscorecomponent = new txtComponent("30px", "Consolas", "black", 980, 40);
+    hiscorecomponent.x = 980;
+    hiscorecomponent.y = 40;
     myScore = new txtComponent("30px", "Consolas", "black", 40, 40);
     but1 = new hudComponent(56, 56, 'but1_spr', 10, gameArea.canvas.height-60);
     but2 = new hudComponent(56, 56,'but2_spr', gameArea.canvas.width-66,gameArea.canvas.height-60);
@@ -48,12 +95,11 @@ function startGame() {
 
 var gameArea = {
   canvas : document.createElement("canvas"),
-  start : function() {
+  start : function(startscrn) {
     this.canvas.width = 1280;
     this.canvas.height = 720;
     this.canvas.style = "padding: 5px; margin: auto; display: block; width: 1000px; height: 560px;";
     if(mobile){ 
-      document.getElementById("navigasjon").style = "position: absolute; font-size: 120%; top: 80%; margin-left: 103%; text-align: center;"
       this.canvas.width = 1280;
       this.canvas.height = 500;
       this.canvas.style = "width: 100%";
@@ -62,13 +108,22 @@ var gameArea = {
     document.body.insertBefore(this.canvas, document.getElementById("spilldiv"));  
     // Her settes spillcanvas inn før en div kalt spilldiv, slik at vi kan endre plasseringen av spillet på nettsiden
     this.frameNo = 0;
-    this.interval = setInterval(updateGameArea, 20);
+    
+    if(startscrn){
+      this.pause = true;
+    } else{
+      this.interval = setInterval(updateGameArea, 20);
+      this.pause = false;
+    }
     rockbottom = gameArea.canvas.height - 90;
-    ground_tiles.push(new sprComponent(962, 96, "ground_spr", 5,
-                                       1, 0, rockbottom));
-    ground_tiles.push(new sprComponent(962, 96, "ground_spr", 5,
-                                       1, groundWt, rockbottom));
+    ground_tiles.push(new sprComponent(962, 96, "ground_spr", 5, 1, 0, rockbottom));
+    ground_tiles.push(new sprComponent(962, 96, "ground_spr", 5, 1, groundWt, rockbottom));
   },
+  stop : function() {
+    clearInterval(this.interval, gameArea.start.interval);
+    this.pause = true;
+    this.frameNo = 0;
+  }, 
   clear : function() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
@@ -278,11 +333,14 @@ function checkHiScore(thisscore) {
   if(thisscore>hiScore)
   {
     localStorage.setItem('hiScore', thisscore)
-    return "Congratulations, new highscore!";
+    hiScore = thisscore;
+    hiscorecomponent.text = "High Score: " + hiScore;
+    hiscorecomponent.update();
+    return "Congrats, new highscore!";
   }
   else
   {
-    return "No highscore this time. ";
+    return "No highscore this time.";
   }
 }
 
@@ -290,11 +348,8 @@ function updateGameArea() {
   var x;
   for (i = 0; i < obstacles.length; i += 1) {
     if (daxtrot.crashWith(obstacles[i])) {
-      if(game) // kjøres ved game over, 1 gang
-      {
-        console.log("Game over. Your score: " + curScore + ". " + checkHiScore(curScore) + " Refresh the page to try again.")
-        game = false
-      }
+        gameArea.stop();
+        startScreen(curScore, checkHiScore(curScore));
       return;
     }
     else if(obstacles[i].sprSheet == "bird_spr") {
@@ -308,10 +363,13 @@ function updateGameArea() {
       }
     }
   }
+  
+
+if(gameArea.pause == false){
   gameArea.clear();
   var scoreInterval = 6 // increment score every N frames
   var buttonInterval = 20 // reset button status every N frames
-  var hinderInterval = 400 // spawn hinder every N frames
+  var hinderInterval = 200 // spawn hinder every N frames
   let groundInterval = (groundWt / 4).toFixed(0) // spawn unending ground tiles
   var paralaxInterval = 12 // scroll background
   bg.update();
@@ -329,7 +387,7 @@ function updateGameArea() {
   }
   myScore.text="SCORE: " + curScore;
   myScore.update();
-  if(curScore>hiScore){
+  if(curScore>hiScore){ // Gjør score og highscore rød dersom nåværende score overgår highscore
     hscorecolor = "red";
     hiscorecomponent.text="High Score: " + curScore;
     hiscorecomponent.update(hscorecolor);
@@ -395,6 +453,7 @@ function updateGameArea() {
   }
   but1.update(b1Held);
   but2.update(b2Held);
+  }
 }
 
 function everyinterval(n) {
@@ -472,21 +531,24 @@ function accelX(piece, n) {
   piece.speedX = n;
 }
 
-// Keydown-sjekker
-document.addEventListener('keydown', (event) => {
-  butDown(event.code);
-}, false);  
 
-// Keyup-sjekker
-document.addEventListener('keyup', (event) => {
-  butUp(event.code);
-  if(event.code == p1Key) {
-    b1Held = false;
-  }
-  else if(event.code == p2Key) {
-    b2Held = false;
-  }
-}, false);
+
+  document.addEventListener('keydown', (event) => {
+    butDown(event.code);
+  }, false);  
+
+  // Keyup-sjekker
+  document.addEventListener('keyup', (event) => {
+    butUp(event.code);
+    if(event.code == p1Key) {
+      b1Held = false;
+    }
+    else if(event.code == p2Key) {
+      b2Held = false;
+    }
+  }, false);
+
+
 
 
 // Nav-bar funksjoner
@@ -500,8 +562,6 @@ function closeNav() {
 
 
 // Under er eventlistenere som gir mobil-touch funksjonalitet
-
-document.addEventListener("DOMContentLoaded", touchHandle);
 
 function touchHandle(){
   window.addEventListener('touchstart', handleStarttouch, false);
