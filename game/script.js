@@ -93,7 +93,7 @@ function hudComponent(width, height, sprite, startX, startY) {
   this.x = startX
   this.y = startY
   this.sprSheet = sprite;
-  this.update = function(isHeld) { // function(isHeld) {
+  this.update = function(isHeld) { 
     var imgId = this.sprSheet
     if(isHeld)
     {
@@ -102,7 +102,6 @@ function hudComponent(width, height, sprite, startX, startY) {
     else{
       sx = 0
     }
-     // set to this.width to get hilit button sprite
     sy = 0 
     ctx.drawImage(document.getElementById(imgId), sx, sy,
 		  this.width, this.height, this.x, this.y,
@@ -518,17 +517,17 @@ function touchHandle(){
       butDown(p2Key)
       but2.update(true)
     }
-
     if(posx>5 && posx<175 && posy<190 && posy>10) // P1 Hopp dersom Q klikkes
-      {
+    {
         butDown(p1Key)
         but1.update(true)
-      }
-      if(posx>660 && posx<810 && posy<155 && posy>10) // P2 Hopp dersom P klikkes
-      {
+    }
+    // if(posx>660 && posx<810 && posy<155 && posy>10) // P2 Hopp dersom P klikkes
+    if(posx>screen.width-180 && posy < 190) // && posy>10)
+    {
         butDown(p2Key)
         but2.update(true)
-      }
+    }
   }
 
   // Touchend event - dersom vi skulle trenge å holde inne knappene f.eks. siden de nå bare funker med 'tap'*/
@@ -540,9 +539,6 @@ function touchHandle(){
     show.innerHTML = "tend";
   }
  
-
-
-
 
    Klikkevent for samme greia. Brukes ikke nå, men i fall vi ønsker å bruke senere lagrer jeg den her
    
