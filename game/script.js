@@ -519,12 +519,13 @@ function touchHandle(){
       but2.update(true)
     }
 
-    if(posx>5 && posx<175 && posy<190 && posy>10) // P1 Hopp dersom Q klikkes
+    if(posx<175 && posy<190) // P1 Hopp dersom Q klikkes
       {
         butDown(p1Key)
         but1.update(true)
       }
-      if(posx>660 && posx<810 && posy<155 && posy>10) // P2 Hopp dersom P klikkes
+
+    if(posx>screen.width-180 && posy < 190) // P2 Hopp dersom P klikkes
       {
         butDown(p2Key)
         but2.update(true)
