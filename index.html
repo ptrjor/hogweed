@@ -1,28 +1,37 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8"><title>Daxtrot</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="game/style.css">
     <title>Hogweed Productions</title>
   </head>
   <body>
     <script src="game/script.js"></script> 
-        <div id="mySidenav" class="sidenav">
-          <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-          <a href="index.html">Hjem</a>
-          <a href="game/game.html">Spill</a>
-          <a href="https://folk.ntnu.no/simebh/hogweed/daxtrot/index.html">Idé (ekstern)</a>
-          <a href="#">Om oss</a><br>
-          <img src="game/assets/hogweed.png"> 
+    <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a> 
+        <!-- <a href="../index.html">Hjem</a>  -->
+        <a href="game/game.html">
+          <img src="game/assets/dog_btn.png" class="menuicon"> Spill</a>
+        <a href="index.html">
+          <img src="game/assets/hog_btn.png" class="menuicon"> Info</a>
+        <!-- <a href="#">Om oss</a> -->
+        <!-- <img src="assets/hogweed.png"> -->
         </div>
-          <span id="navigasjon" onclick="openNav()">&#9776; Meny</span>
+        <div class="flex" id="spilldiv"></div>
+        <div id="spandiv"><span id="navigasjon"
+                                onclick="openNav()">&#9776; Meny</span></div >
         <div class="grid-container">
-          <div class="grid-item">
+          <!-- <div class="grid-item">
               <img id="logo" src="game/assets/hogweed.png"> 
-          </div>
+          </div> -->
           <div class="grid-item">
               <h1>Velkommen til Hogweed Productions</h1>
               <h4>Sjekk ut <a href="game/game.html">Daxtrot her</a>.</h4>
+              <p>Noen ord om prosjektet og hvem vi er, eventuelt link til
+              <a href="https://folk.ntnu.no/simebh/hogweed/daxtrot/index.html">
+              tidlig skisse</a> med mer.</p>
+              
           </div>
         </div>
   </body>

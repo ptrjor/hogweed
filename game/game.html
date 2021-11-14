@@ -1,34 +1,37 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>Daxtrot</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
     <link rel="stylesheet" href="style.css">
-    <title>Daxtrot</title>
   </head>
   <body onload="startGame()">
     <script src="script.js"></script>
-        <div id="mySidenav" class="sidenav">
-          <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-          <a href="../index.html">Hjem</a>
-          <a href="game.html">Spill</a>
-          <a href="https://folk.ntnu.no/simebh/hogweed/daxtrot/index.html">Idé (ekstern)</a>
-          <a href="#">Om oss</a>
-          <img src="assets/hogweed.png"> 
-        </div>
-        <div id="spandiv"><span id="navigasjon" onclick="openNav()">&#9776; Meny</span></div>
-        <div class="flex" id="spilldiv"></div> 
-        <div class="grid-container">
-            <div class="grid-item" id="titlediv">
-              <text class="bold">Daxtrot Prototype</text><br><br>
-              Bring the daxtrot to the end!
-            </div>
-            <div class="grid-item" id="controlsdiv">
-              <text class="bold">Controls</text><br><br>
-              <text id="p1">Player 1: Q</text><br><br>
-              <text id="p2">Player 2: P</text>
-            </div>       
-          </div>    
-        
+    <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a> 
+        <a href="game.html">
+          <img src="assets/dog_btn.png" class="menuicon"> Spill</a>
+        <a href="../index.html">
+          <img src="assets/hog_btn.png" class="menuicon"> Info</a>
+        <!-- <a href="#">Om oss</a> -->
+        <!-- <img src="assets/hogweed.png"> -->
+    </div>
+    <div id="spandiv"><span id="navigasjon"
+                            onclick="openNav()">&#9776</span></div >
+    <div class="flex" id="spilldiv"></div>
+    <!-- Forslag: snip grid-container, fokuser på nedskåret UI:
+         <div class="grid-container">
+           <div class="grid-item" id="titlediv">
+             <text class="bold">Daxtrot Prototype</text><br><br>
+             Bring the daxtrot to the end!
+           </div>
+           <div class="grid-item" id="controlsdiv">
+             <text class="bold">Controls</text><br><br>
+             <text id="p1">Player 1: Q</text><br><br>
+             <text id="p2">Player 2: P</text>
+           </div>       
+         </div> -->
     <!-- prepare sprites -->
     <img id="bg_spr" src="assets/examplebackground.png"></img>
     <img id="ground_spr" src="assets/rock_ground.png"></img>

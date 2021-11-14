@@ -10,6 +10,9 @@
     display: flex;
     justify-content: left;
     padding: 2%;
+    /* position: absolute;
+    top: 0px;
+    left: 0px; */
   }
 
 .grid-container {
@@ -26,6 +29,9 @@
     text-align: center;
 }
 
+.grid-item p {
+    font-size: 20px;
+}
 .bold{
     font-weight: bold;
     font-size: 25px;
@@ -72,7 +78,7 @@ body {
     z-index: 1;
     top: 0;
     left: 0;
-    background-color: rgb(255, 255, 255);
+    background-color: rgb(255, 255, 225, 50%);
     overflow-x: hidden;
     transition: 0.5s;
     padding-top: 60px;
@@ -85,6 +91,7 @@ body {
     color: #818181;
     display: block;
     transition: 0.3s;
+    vertical-align: middle;
   }
   
   .sidenav a:hover {
@@ -104,7 +111,13 @@ body {
     font-size: 36px;
     margin-left: 50px;
   }
-  
+    
+  .sidenav .menuicon {
+      max-width: 2em;
+      left: 10px;
+      padding: 1em;
+      vertical-align: middle;
+  }
 
 /* Under er mobilview css */
 
@@ -120,6 +133,9 @@ body {
     .grid-item{
         font-size: 20px;
     }
+    .grid-item p {
+        font-size: 18px;
+    }
     body{
         font-size: 100%;  
     }
@@ -132,9 +148,7 @@ body {
         display: none;
         visibility: hidden;
     }
-
     @media (orientation: landscape){
-    
     }
 
   }

@@ -1,8 +1,10 @@
+var lang = "no" // "no" or "en"
 var daxtrot, p1, p2, ground, bg;
 var myScore, hiscorecomponent, hscorecolor;
 var rockbottom
 var obstacles = [];
 var ground_tiles = [] ;
+var runDist = 0 ;
 const groundWt = 962 ;
 var curScore = 0
 var p1Key = "KeyQ";
@@ -11,53 +13,63 @@ var b1Held = false;
 var b2Held = false;
 const gravity = 0.2;
 var game = true;
+var isPaused = false;
+var gameOver = false;
 var hiScore = localStorage.getItem('hiScore'); // Lagrer en highscore i nettleserens lokallagring. Lagres mellom økter på samme maskin, men ikke mellom enheter eller forskjellige nettlesere.
 var mobile = false;
 var gamecanvas;
 
 function startGame() {
   if(screen.width<450){
-    document.getElementById("spilldiv").innerHTML = "Rotate screen and refresh to play.";
+    if (lang == "en") {
+      document.getElementById("spilldiv").innerHTML = "Rotate screen and refresh to play.";
+    }
+    else if (lang == "no") {
+      document.getElementById("spilldiv").innerHTML = "Roter skjermen og oppdater nettsiden for å spille.";
+    }
     return
   }
   else if(screen.width>450 && screen.width<922){mobile=true} // Dette betyr at det sannsynligvis er en rotert mobilskjerm
 
   gameArea.start();
   gamecanvas = gameArea.canvas;
-  bg = new sprComponent(2412, 810, "bg_spr", 0, 1, 1, 1);
+  bg = new sprComponent(2412, 810, "bg_spr", 0, 1, 1, 1); // backdrop sprite
   player1 = new sprComponent(62, 48, "player1_spr", 10, 7, 40, 400); 
   player2 = new sprComponent(62, 48, "player2_spr", 0, 7, 130, 400);
   daxtrot = new sprComponent(256, 96, "daxtrot_spr", 20, 4, 10, 850);
   // obs = new sprComponent(64, 64, "hinder_spr", 1, 1, 700, 700);
-  
-  
 
   if(mobile){
-    hiscorecomponent = new txtComponent("40px", "Consolas", "black", 680, 40);
-    myScore = new txtComponent("40px", "Consolas", "black", 380, 40);
+    hiscorecomponent = new txtComponent("40px", "Consolas", "black", 2*gameArea.canvas.width/3 + 30, 60);
+    myScore = new txtComponent("40px", "Consolas", "black", gameArea.canvas.width/3 - 30, 60);
     but1 = new hudComponent(168, 168, 'but1big_spr', 10, 10);
     but2 = new hudComponent(168, 168,'but2big_spr', gameArea.canvas.width-180,10);
-  } else{
-    hiscorecomponent = new txtComponent("30px", "Consolas", "black", 980, 40);
-    myScore = new txtComponent("30px", "Consolas", "black", 40, 40);
+  }
+  else
+  {
+    hiscorecomponent = new txtComponent("30px", "Consolas", "black", 1100, 40, 40);
+    myScore = new txtComponent("30px", "Consolas", "black", 1135, 80, 40);
     but1 = new hudComponent(56, 56, 'but1_spr', 10, gameArea.canvas.height-60);
     but2 = new hudComponent(56, 56,'but2_spr', gameArea.canvas.width-66,gameArea.canvas.height-60);
   }
-  
 }
 
 var gameArea = {
   canvas : document.createElement("canvas"),
-  start : function() {
+  start : function() { // initiate screen
     this.canvas.width = 1280;
     this.canvas.height = 720;
     this.canvas.style = "padding: 5px; margin: auto; display: block; width: 1000px; height: 560px;";
-    if(mobile){ 
-      document.getElementById("navigasjon").style = "position: absolute; font-size: 120%; top: 80%; margin-left: 103%; text-align: center;"
-      this.canvas.width = 1280;
-      this.canvas.height = 500;
+    if(mobile){
+      let topbord = gameArea.canvas.height - 10
+      document.getElementById("navigasjon").style = "position: absolute; font-size: 120%; top: 1%; left: 50%;" // text-align: center;"
+      // this.canvas.width = 1280;
+      // this.canvas.height = 500;
       this.canvas.style = "width: 100%";
-    } 
+    }
+    else {
+      document.getElementById("navigasjon").style = "position: absolute; font-size: top: 30; left: 10; text-align: center;" //    hiscorecomponent = new txtComponent("30px", "Consolas", "black", 1100, 50, 40);
+    }
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.getElementById("spilldiv"));  
     // Her settes spillcanvas inn før en div kalt spilldiv, slik at vi kan endre plasseringen av spillet på nettsiden
@@ -69,8 +81,20 @@ var gameArea = {
     ground_tiles.push(new sprComponent(962, 96, "ground_spr", 5,
                                        1, groundWt, rockbottom));
   },
-  clear : function() {
+  clear : function() { // empty screen for redraw
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  },
+  resetBoard : function() { // restart new game
+    runDist = 0
+    curScore = 0
+    gameArea.frameNo = 0
+    obstacles = [];
+    runDist = 0 ;
+    daxtrot.x=10; daxtrot.y=850; daxtrot.sprReel=0; daxtrot.sprFrame=0;
+    player1.x = 40; player1.y = 400; player1.sprReel=0; player1.sprFrame=0;
+    player2.x = 140; player2.y = 400 ; player2.sprReel=0; player2.sprFrame=0;
+    player1.speedX = 0; player1.speedY = 0;
+    player2.speedX = 0; player2.speedY = 0;
   }
 }
 
@@ -223,12 +247,12 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
       }
     }
     else if (this.onHound() && this.sprSheet != 'daxtrot' && this.speedY > -1)
-    {
+    { // this is sitting on daxtrot
       this.y = daxtrot.y - (this.height / 1.5) + daxtrot.sprBorder
       this.speedY = daxtrot.speedY;
       this.speedX = daxtrot.speedX;
       if (this.sprReel != 0) {
-        this.sprReel = 1;
+        this.sprReel = 0;
       }
     }
     else { // piece is in the air, apply gravity
@@ -278,68 +302,57 @@ function checkHiScore(thisscore) {
   if(thisscore>hiScore)
   {
     localStorage.setItem('hiScore', thisscore)
-    return "Congratulations, new highscore!";
+    return true;
   }
   else
   {
-    return "No highscore this time. ";
+    return false; 
   }
 }
 
 function updateGameArea() {
+  if (isPaused) {return;}
   var x;
-  for (i = 0; i < obstacles.length; i += 1) {
-    if (daxtrot.crashWith(obstacles[i])) {
-      if(game) // kjøres ved game over, 1 gang
-      {
-        console.log("Game over. Your score: " + curScore + ". " + checkHiScore(curScore) + " Refresh the page to try again.")
-        game = false
-      }
-      return;
+  if (gameOver) { // kjøres ved game over, 1 gang
+  // for (i = 0; i < obstacles.length; i += 1) {
+    // if (daxtrot.crashWith(obstacles[i])) {
+    var hiscoreTxt, loscoreTxt, byeTxt, gameoverTxy, printMe
+    if (lang == "en") {
+      gameoverTxt = "Game over. Your score: ";
+      hiscoreTxt = " Congratulations, new high score! ";
+      loscoreTxt = " No high score this time. ";
     }
-    else if(obstacles[i].sprSheet == "bird_spr") {
-      if (obstacles[i].crashWith(player1)) {
-        player1.speedY = -3;
-        player1.speedX = -5;
-      }
-      if (obstacles[i].crashWith(player2)) {
-        player2.speedY = -3;
-        player2.speedX = -5;
-      }
+    else if(lang == "no") {
+      gameoverTxt = "Dere kræsja. Poeng: ";
+      hiscoreTxt = " Gratulerer, ny rekord!";
+      loscoreTxt = " Bedre lykke neste gang.";
     }
+    if (checkHiScore(curScore)) {
+      printMe = (gameoverTxt + curScore + hiscoreTxt)
+    }
+    else {
+      printMe = (gameoverTxt + curScore + loscoreTxt)
+    }
+    console.log(printMe)    
+    window.alert(printMe)
+    gameOver = false;
+    gameArea.resetBoard();
+    return;
   }
   gameArea.clear();
   var scoreInterval = 6 // increment score every N frames
   var buttonInterval = 20 // reset button status every N frames
   var hinderInterval = 400 // spawn hinder every N frames
-  let groundInterval = (groundWt / 4).toFixed(0) // spawn unending ground tiles
+  var groundInterval = (groundWt / 4).toFixed(0) // spawn unending ground tiles
   var paralaxInterval = 12 // scroll background
   bg.update();
   gameArea.frameNo += 1;
-  // scroll background, increment score
+  runDist += 1
+  // scroll background,
   if (gameArea.frameNo == 1 || everyinterval(groundInterval)) {
     ground_tiles.push(new sprComponent(962, 96, "ground_spr", 5,
 				       1, gameArea.canvas.width, rockbottom));
-  }
-  if (gameArea.frameNo == 1 || everyinterval(scoreInterval)) {
-    curScore = curScore + 1;
-  }
-  if (gameArea.frameNo == 1 || everyinterval(paralaxInterval)) {
-    bg.x -= 1;
-  }
-  myScore.text="SCORE: " + curScore;
-  myScore.update();
-  if(curScore>hiScore){
-    hscorecolor = "red";
-    hiscorecomponent.text="High Score: " + curScore;
-    hiscorecomponent.update(hscorecolor);
-  }
-  else{
-    hscorecolor = "black";
-    hiscorecomponent.text="High Score: " + hiScore;
-    hiscorecomponent.update();
-  }
-  
+  }  
   // scroll ground and obstacles
   for (i = 0; i < ground_tiles.length; i+= 1) {
     ground_tiles[i].x -= 3 ;
@@ -355,16 +368,26 @@ function updateGameArea() {
       {
         obstacles[i].speedY = - obstacles[i].speedY;
       }
+      if (obstacles[i].crashWith(player1)) {
+        player1.speedY = -3;
+        player1.speedX = -5;
+      }
+      if (obstacles[i].crashWith(player2)) {
+        player2.speedY = -3;
+        player2.speedX = -5;
+      }
+    }
+    if (obstacles[i].crashWith(daxtrot)) {
+      console.log("Crash")
+      gameOver = true // handle i neste frame
     }
   }
   // move daxtrot and players
   daxtrot.newPos(); daxtrot.update();
   player1.newPos(); player1.update();
   player2.newPos(); player2.update();
-  // spawn new obstacles
-  // Hadde vært fint å hardkode et level med varierende obstacles,
-  // men dette er allerede spillbart som "endless runner", eventuelt sett
-  // random verdi til hinderInterval for litt variasjon
+    // spawn new obstacles: testing
+    
   if (gameArea.frameNo == 1 || everyinterval(hinderInterval)) {
     spawnType = Math.floor(Math.random() * 2) // which type of hinder
     if (spawnType == 0) {
@@ -375,7 +398,7 @@ function updateGameArea() {
     else if (spawnType == 1) {
       let x = gameArea.canvas.width;
       let y = rockbottom - (100 + Math.floor(Math.random() *400))
-      nuObs=new sprComponent(54, 36, "bird_spr", 5, 4, x, y);
+       nuObs=new sprComponent(54, 36, "bird_spr", 5, 4, x, y);
       // attributes to fly up and down
       let sverve = ((rockbottom - 60) - y) / 2
       nuObs.maxY = y + sverve
@@ -395,7 +418,25 @@ function updateGameArea() {
   }
   but1.update(b1Held);
   but2.update(b2Held);
-}
+  // increment score
+  if (gameArea.frameNo == 1 || everyinterval(scoreInterval)) {
+    curScore = curScore + 1;
+  }
+  if (gameArea.frameNo == 1 || everyinterval(paralaxInterval)) {
+    bg.x -= 1;
+  }
+  myScore.text=curScore;
+  if(curScore>hiScore){
+    hiscorecomponent.text="🜲 " + curScore;
+    myScore.update("orange");
+    hiscorecomponent.update("orange");
+  }
+  else{
+    hiscorecomponent.text="🜲 " + hiScore;
+    myScore.update("black");
+    hiscorecomponent.update("black");
+  }
+  } 
 
 function everyinterval(n) {
   if ((gameArea.frameNo / n) % 1 == 0) {return true;}
@@ -426,9 +467,6 @@ function butUp(keycode) {
   else {
     return
   }
-  console.log(pThis.sprSheet+" pressed button")
-  console.log("Status of this player.button: "+pThis.button)
-  console.log("Status of other player.button: "+pOther.button)
   pThis.button = true
   if (pOther.button == true && daxtrot.onGround()) {
     // both players pushed button, make daxtrot jump
@@ -492,10 +530,12 @@ document.addEventListener('keyup', (event) => {
 // Nav-bar funksjoner
 function openNav() {
   document.getElementById("mySidenav").style.width = "250px";
+  isPaused = true;
 }
 
 function closeNav() {
   document.getElementById("mySidenav").style.width = "0";
+  isPaused = false;
 }
 
 
@@ -524,8 +564,7 @@ function touchHandle(){
         butDown(p1Key)
         but1.update(true)
       }
-    
-    if(posx>screen.width-180 && posy < 190) // P2 Hopp dersom P klikkes
+      if(posx>screen.width-180 && posy<190) // P2 Hopp dersom P klikkes
       {
         butDown(p2Key)
         but2.update(true)
@@ -576,4 +615,6 @@ function touchHandle(){
         y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
     };
   }  */
+
 }
+
