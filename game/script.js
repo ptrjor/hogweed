@@ -87,6 +87,7 @@ var gameArea = {
   resetBoard : function() { // restart new game
     runDist = 0
     curScore = 0
+    hiScore = localStorage.getItem('hiScore')
     gameArea.frameNo = 0
     obstacles = [];
     runDist = 0 ;
