@@ -87,20 +87,20 @@ body {
   .sidenav a {
     padding: 8px 8px 8px 32px;
     text-decoration: none;
-    font-size: 25px;
-    color: #818181;
+    font-size: 22px;
+    color: #a1a1a1;
     display: block;
     transition: 0.3s;
     vertical-align: middle;
   }
   
   .sidenav a:hover {
-    color: #f1f1f1;
+    color: #303030;
   }
 
   .sidenav img {
       width: 50%;
-      margin-left: 15%;
+      /* margin-left: 5%; */
       transition: 0.3s;
   }
   
@@ -209,6 +209,17 @@ canvas {
     visibility: hidden;
 }
 
+#tutorial_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 205px;
+    width: 165px;
+    background-image: url(assets/tut_tree.png);
+    visibility: hidden;
+}
+
 #daxtrot_spr
 {
     position: absolute;
@@ -260,6 +271,7 @@ canvas {
     background-image: url(assets/button2.png);
     visibility: hidden;
 }
+
 #but1big_spr
 {
     position: absolute;
@@ -270,6 +282,7 @@ canvas {
     background-image: url(assets/button2.png);
     visibility: hidden;
 }
+
 #but2big_spr
 {
     position: absolute;
@@ -281,13 +294,71 @@ canvas {
     visibility: hidden;
 }
 
+#talltrunk_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 143px;
+    width: 310px;
+    background-image: url(assets/tall_trunk.png);
+    visibility: hidden;
+}
+#tallertrunk_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 200px;
+    width: 434px;
+    background-image: url(assets/tallest_trunk.png);
+    visibility: hidden;
+}
+
+#vulture_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 100px;
+    width: 100px;
+    background-image: url(assets/button2.png);
+    visibility: hidden;
+}
+#bones_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 80px;
+    width: 40px;
+    background-image: url(assets/bones.png);
+    visibility: hidden;
+}
+#crown_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 80px;
+    width: 40px;
+    background-image: url(assets/crown.png);
+    visibility: hidden;
+}
+#thorns_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 64px;
+    width: 120px;
+    background-image: url(assets/crown.png);
+    visibility: hidden;
+}
+
 button
 {
     width: 20%;
     height: 10%;
     background-color: mediumslateblue;
 }
-
-
-
-  
