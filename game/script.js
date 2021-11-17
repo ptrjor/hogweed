@@ -9,6 +9,7 @@ var b2Held = false;
 const gravity = 0.2;
 var gameOver = false;
 var mobile = false;
+var speedScroll = false; // til true når daxtrot når skjermenden
 var lastscore, hitext;
 var k = 0;
 var c;
@@ -241,7 +242,7 @@ function startGame() {
     hiscorecomponent.y = 80;
     myScore = new txtComponent("30px", "Consolas", "black", 1135, 40);
     but1 = new hudComponent(56, 56, 'but1_spr', 10, gameArea.canvas.height-60);
-    but1key = new txtComponent("25px", "Consolas", "black", 32, gameArea.canvas.height-25);
+    but1key = new txtComponent("25px", "Consolas", "black", 30, gameArea.canvas.height-25);
     but2 = new hudComponent(56, 56,'but2_spr', gameArea.canvas.width-66,gameArea.canvas.height-60);
     but2key = new txtComponent("25px", "Consolas", "black", gameArea.canvas.width-45, gameArea.canvas.height-25);
   }
@@ -448,6 +449,7 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
       this.y = daxtrot.y - (this.height / 1.5) + daxtrot.sprBorder
       this.speedY = daxtrot.speedY;
       this.speedX = daxtrot.speedX;
+      this.vultureFodder = false;
       if (this.sprReel != 0) {
         this.sprReel = 0;
       }
@@ -478,7 +480,7 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
   this.update = function() { // draw current sprite frame
     ctx = gameArea.context;
     if (this.frameLen) { // animated sprite
-      if (everyinterval(7)) {
+      if (everyinterval(7) && !speedScroll) {
         if (!this.throttleAnim) {
           this.sprFrame+=1 // to next animation frame
           if (this.sprFrame >= this.frameLen) { // cycle animation
@@ -518,6 +520,17 @@ function updateGameArea() { // one game turn
     startScreen(curScore, checkHiScore(curScore));
     gameOver = false;
     return;
+  }
+  else if(daxtrot.x > gameArea.canvas.width - daxtrot.width * 1.25) {
+    speedScroll = true;
+    clearInterval(gameArea.interval, gameArea.start.interval);
+    gameArea.interval = setInterval(updateGameArea, 2);
+    // jackpot += 100
+  }
+  else if(speedScroll && daxtrot.x < daxtrot.width/2) {
+    speedScroll = false;
+    clearInterval(gameArea.interval, gameArea.start.interval);
+    gameArea.interval = setInterval(updateGameArea, 20);
   }
   gameArea.clear();
   var scoreInterval = 6 // increment score every N frames
@@ -569,7 +582,7 @@ function updateGameArea() { // one game turn
     }
     if (collided) {
       if (pup.sprSheet == "crown_spr" && (collided != daxtrot)) {
-        jackpot += 200
+        jackpot += 250
         collectibles.pop(i);
         curCollected.push(pup);
       };
@@ -581,82 +594,85 @@ function updateGameArea() { // one game turn
     let obs = obstacles[i]
     obs.x += -3;
     if (obs.sprSheet == "bird_spr") {
-      obs.x += -1;
-      obs.y += obs.speedY;
-      if (obs.y < obs.minY || obs.y > obs.maxY)
-      {
-        obs.speedY = - obs.speedY;
-      }
-      if (obs.crashWith(player1)) {
-        player1.speedY = -3;
-        player1.speedX = -5;
-      }
-      if (obs.crashWith(player2)) {
-        player2.speedY = -3;
-        player2.speedX = -5;
+      if (!speedScroll) {
+        obs.x += -1;
+        obs.y += obs.speedY;
+        if (obs.y < obs.minY || obs.y > obs.maxY)
+        {
+          obs.speedY = - obs.speedY;
+        }
+        if (obs.crashWith(player1)) {
+          player1.speedY = -3;
+          player1.speedX = -5;
+        }
+        if (obs.crashWith(player2)) {
+          player2.speedY = -3;
+          player2.speedX = -5;
+        }
       }
     }
     else if (obs.sprSheet == "vulture_spr") {
       obs.centerX -= 3 // stay focused on spawned x-coord, scrolling
-      if (obs.crashWith(player1) || obs.crashWith(player2)) { // caught frog
-        obs.diving = true;
-        obs.speedX = -1;
-        obs.speedY = -4;
-        if (obs.crashWith(player1)) { // hold player1 in claws
-          player1.x = obs.x + 30; 
-          player1.y = obs.y + 40;
-          player1.isVulturefodder = true; // allow player to leave screen
-        }
-        else if (obs.crashWith(player2)) { // hold player1 in claws
-          player2.x = obs.x + 30; 
-          player2.y = obs.y + 40;
-          player2.isVulturefodder = true;
-        }
-      }
-      else if(!obs.diving) { // check if above vulnerable player avatar
-        if(obs.x-15<player1.x && obs.x+15>player1.x && !player1.onHound() && player1.y > obs.y) {
-          obs.diving = true; // try to snatch player 1
-          obs.speedY = 12;
-          obs.speedX = 0;
-        }
-        else if(obs.x-15<player2.x && obs.x+15>player2.x && !player2.onHound() && player2.y > obs.y) {
-          obs.diving = true; // try to snatch player 1
-          obs.speedY = 12;
-        obs.speedX = 0;
-        }
-      }
-      if (obs.diving) { // vulture diving to catch a frog
-        if (obs.y + obs.height > rockbottom) { // missed player, now fly away
+      if (!speedScroll) {
+        if (obs.crashWith(player1) || obs.crashWith(player2)) { // caught frog
+          obs.diving = true;
           obs.speedX = -1;
           obs.speedY = -4;
+          if (obs.crashWith(player1)) { // hold player1 in claws
+            player1.x = obs.x + 30; 
+            player1.y = obs.y + 40;
+            player1.isVulturefodder = true; // allow player to leave screen
+          }
+          else if (obs.crashWith(player2)) { // hold player1 in claws
+            player2.x = obs.x + 30; 
+            player2.y = obs.y + 40;
+            player2.isVulturefodder = true;
+          }
         }
+        else if(!obs.diving) { // check if above vulnerable player avatar
+          if(obs.x-15<player1.x && obs.x+15>player1.x && !player1.onHound() && player1.y > obs.y) {
+            obs.diving = true; // try to snatch player 1
+            obs.speedY = 12;
+            obs.speedX = 0;
+          }
+          else if(obs.x-15<player2.x && obs.x+15>player2.x && !player2.onHound() && player2.y > obs.y) {
+            obs.diving = true; // try to snatch player 1
+            obs.speedY = 12;
+            obs.speedX = 0;
+          }
+        }
+        if (obs.diving) { // vulture diving to catch a frog
+          if (obs.y + obs.height > rockbottom) { // missed player, now fly away
+            obs.speedX = -1;
+            obs.speedY = -4;
+          }
+        }
+        else { // normal movement pattern
+          let maxY = obs.centerY + obs.sverve
+          let minY = obs.centerY - obs.sverve
+          let maxX = obs.centerX + obs.sverve * 2
+          let minX = obs.centerX - obs.sverve * 2
+          if (obs.y > maxY) {
+            obs.speedY = - 2;
+          }
+          else if (obs.y < minY) {
+            obs.speedY = 2;
+          }
+          if (obs.x > maxX) {
+            obs.speedX = -6;
+          }
+          else if (obs.x < minX) {
+            obs.speedX = 3;
+          }
+        };
+        // apply flying speed
+        obs.y += obs.speedY;
+        obs.x += obs.speedX;
+        if (obs.speedX <= 0) {
+          obs.sprReel = 0;}
+        else {
+          obs.sprReel = 1;}
       }
-      else { // normal movement pattern
-        let maxY = obs.centerY + obs.sverve
-        let minY = obs.centerY - obs.sverve
-        let maxX = obs.centerX + obs.sverve * 2
-        let minX = obs.centerX - obs.sverve * 2
-        console.log("min/max",minX,minY,"/",maxX,maxY,"sverve:",obs.sverve,"pos:",obs.x,obs.y)
-        if (obs.y > maxY) {
-          obs.speedY = - 2;
-        }
-        else if (obs.y < minY) {
-          obs.speedY = 2;
-        }
-        if (obs.x > maxX) {
-          obs.speedX = -6;
-        }
-        else if (obs.x < minX) {
-          obs.speedX = 3;
-        }
-      };
-      // apply flying speed
-      obs.y += obs.speedY;
-      obs.x += obs.speedX;
-      if (obs.speedX <= 0) {
-        obs.sprReel = 0;}
-      else {
-        obs.sprReel = 1;}
     }
     obs.update()
     if (obs.crashWith(daxtrot)) {
@@ -665,10 +681,16 @@ function updateGameArea() { // one game turn
     }
   }
   // move daxtrot and players
-  daxtrot.newPos(); daxtrot.update();
-  player1.newPos(); player1.update();
-  player2.newPos(); player2.update();
-    
+  if (speedScroll) {
+    daxtrot.x-=3 ; daxtrot.update();
+    player1.x-=3 ; player1.update();
+    player2.x-=3 ; player2.update();
+  }
+  else {
+    daxtrot.newPos(); daxtrot.update();
+    player1.newPos(); player1.update();
+    player2.newPos(); player2.update();
+  }
   // reset button status
   if (everyinterval(buttonInterval)) {
     player1.button = false;
