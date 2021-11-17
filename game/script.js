@@ -4,13 +4,10 @@ var rockbottom;
 var obstacles, ground_tiles, backdrops, collectibles;
 var runDist, curScore, curCollected, jackpot ;
 const groundWt = 962 ;
-var p1Key = "KeyQ";
-var p2Key = "KeyP";
 var b1Held = false;
 var b2Held = false;
 const gravity = 0.2;
 var gameOver = false;
-var hiScore = localStorage.getItem('hiScore'); // Lagrer en highscore i nettleserens lokallagring. Lagres mellom økter på samme maskin, men ikke mellom enheter eller forskjellige nettlesere.
 var mobile = false;
 var lastscore, hitext;
 var k = 0;
@@ -18,6 +15,11 @@ var c;
 var pkeychange = 1;
 var startscrn = true;
 var startbtn, changeInputCmp;
+var hiScore = localStorage.getItem('hiScore'); // Lagrer en highscore i nettleserens lokallagring. Lagres mellom økter på samme maskin, men ikke mellom enheter eller forskjellige nettlesere.
+var p1Key = localStorage.getItem('config_p1')
+var p2Key = localStorage.getItem('config_p2')
+if (!p1Key) { p1Key = "KeyQ"; }
+if (!p2Key) { p2Key = "KeyP"; }
 
 // Get language from URL parameters
 const urlPara = new URLSearchParams(window.location.search);
@@ -163,7 +165,8 @@ function handleKeydown(event){
       if (String.fromCharCode(event.keyCode).match(/(\w|\s)/g)) {
           // Trykt knapp må være en bokstavknapp
           p1Key = event.code;
-          console.log(p1Key)
+          localStorage.setItem('config_p1', p1Key)        
+          console.log("P1 key now: "+p1Key)
         if(lang=="en"){
         startbtn.text = "Player 1 key: " + p1Key[3] + ". Choose player 2 key."
         } else{
@@ -194,8 +197,9 @@ function handleKeydown(event){
         startbtn.update();
     } 
     else{
-        if (String.fromCharCode(event.keyCode).match(/(\w|\s)/g)) {
+      if (String.fromCharCode(event.keyCode).match(/(\w|\s)/g)) {
         p2Key = event.code;
+        localStorage.setItem('config_p2', p2Key)
         if(lang=="en"){
         startbtn.text = "Player 2 key: " + p2Key[3] + ". Click to play";
         } else{
