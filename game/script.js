@@ -112,7 +112,17 @@ function startScreen(scr, newHscore) {
 
 function handleclick(e){
   e.preventDefault();
-  if(e.clientX>260 && e.clientX < 540 && e.clientY > 510 && e.clientY < 570 && mobile == false)
+  var rect = c.getBoundingClientRect();
+  var cx = e.clientX;
+  var cy = e.clientY;
+
+  var rectleft = rect.left.toFixed(0);
+  var recttop = rect.top.toFixed(0);
+
+  var x = cx-rectleft;
+  var y = cy-recttop
+  
+  if(x>35 && x<315 && y>510 && y<550 && mobile == false)
   {
     changeInput();
     c.removeEventListener("click",handleclick)
