@@ -1,4 +1,3 @@
-var lang = "no"; // "no" or "en"
 var daxtrot, p1, p2, ground, bg;
 var myScore, hiscorecomponent, hscorecolor;
 var rockbottom;
@@ -17,6 +16,11 @@ var lastscore, hitext;
 var k = 0;
 var c;
 var startscrn = true;
+
+// Get language from URL parameters
+const urlPara = new URLSearchParams(window.location.search);
+var lang = urlPara.get("lang");
+if (!lang) { lang = "no"; }
 
 function startScreen(scr, newHscore) {  
   if(screen.width<450){
@@ -697,14 +701,15 @@ function touchHandle(){
       }
   }
 
-  // Touchend event - dersom vi skulle trenge å holde inne knappene f.eks. siden de nå bare funker med 'tap'*/
-/*   window.addEventListener('touchend', handleEndtouch, false);
+  // Touchend event - dersom vi skulle trenge å holde inne knappene f.eks. siden de nå bare funker med 'tap'
+  /*
+  window.addEventListener('touchend', handleEndtouch, false);
   function handleEndtouch(evt){
     evt.preventDefault();
     show.innerHTML = "tend";
   }
-   Klikkevent for samme greia. Brukes ikke nå, men i fall vi ønsker å bruke senere lagrer jeg den her   
-  /* window.addEventListener('click', canvclick, false);
+  // Klikkevent for samme greia. Brukes ikke nå, men i fall vi ønsker å bruke senere lagrer jeg den her   
+  window.addEventListener('click', canvclick, false);
   function canvclick(e) {    
     var pos = getMousePos(gamecanvas, e);
     posx = pos.x;
@@ -720,14 +725,14 @@ function touchHandle(){
         butDown(p2Key)
       }
     }
-  }
+  } 
   function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     return {
         x: (evt.clientX - rect.left) / (rect.right - rect.left) * canvas.width,
         y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
     };
-  }  */
+  } */ 
 }
 
 var rockMap = {
@@ -771,7 +776,7 @@ var rockMap = {
     case 1590:
       spawnThorns();
       break;
-    case 1610:
+    case 1600:
       spawnThorns();
       break;
     default: // fallback random generation
