@@ -107,14 +107,12 @@ function startScreen(scr, newHscore) {
   changeInputCmp.update();
   }
   c = gameArea.canvas;
-  
   c.addEventListener("click",handleclick,false);
 }
 
 function handleclick(e){
   e.preventDefault();
-  
-  if(e.clientX>270 && e.clientX < 530 && e.clientY > 510 && e.clientY < 570 && mobile == false)
+  if(e.clientX>260 && e.clientX < 540 && e.clientY > 510 && e.clientY < 570 && mobile == false)
   {
     changeInput();
     c.removeEventListener("click",handleclick)
@@ -137,7 +135,6 @@ function changeInput()
   }
   startbtn.x = 100;
   startbtn.update();
-
   document.addEventListener('keydown',handleKeydown,false);  
 }
 
