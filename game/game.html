@@ -8,31 +8,13 @@
   </head>
   <body onload="startScreen()">
     <script src="script.js"></script>
-    <div id="mySidenav" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a> 
-        <a href="game.html">
-          <img src="assets/dog_btn.png" class="menuicon"> Spill</a>
-        <a href="../index.html">
-          <img src="assets/hog_btn.png" class="menuicon"> Info</a>
-        <!-- <a href="#">Om oss</a> -->
-        <!-- <img src="assets/hogweed.png"> -->
-    </div>
+    <script src="../languages.js"></script>
+    <script>fetchNavbar()</script>
+    <div id="mySidenav" class="sidenav"></div>
     <div id="spandiv"><span id="navigasjon"
                             onclick="openNav()">&#9776</span></div >
     <div class="flex" id="spilldiv"></div>
-    <!-- Forslag: snip grid-container, fokuser på nedskåret UI:
-         <div class="grid-container">
-           <div class="grid-item" id="titlediv">
-             <text class="bold">Daxtrot Prototype</text><br><br>
-             Bring the daxtrot to the end!
-           </div>
-           <div class="grid-item" id="controlsdiv">
-             <text class="bold">Controls</text><br><br>
-             <text id="p1">Player 1: Q</text><br><br>
-             <text id="p2">Player 2: P</text>
-           </div>       
-         </div> -->
-    <!-- prepare sprites -->
+
     <img id="bg_spr" src="assets/examplebackground.png"></img>
     <img id="ground_spr" src="assets/rock_ground.png"></img>
     <img id="daxtrot_spr" src="assets/dax.png"></img>
@@ -40,10 +22,17 @@
     <img id="player2_spr" src="assets/player_2.png"></img>
     <img id="hinder_spr" src="assets/hinder.png"></img>
     <img id="bird_spr" src="assets/bird.png"></img>
+    <img id="tutorial_spr" src="assets/tut_tree.png"></img>
     <img id="but1_spr" src="assets/button1.png"></img>
     <img id="but1big_spr" src="assets/button1_big.png"></img>
     <img id="but2_spr" src="assets/button2.png"></img>
     <img id="but2big_spr" src="assets/button2_big.png"></img>
+    <img id="vulture_spr" src="assets/vulture.png"></img>
+    <img id="talltrunk_spr" src="assets/tall_trunk.png"></img>
+    <img id="tallertrunk_spr" src="assets/tallest_trunk.png"></img>
+    <img id="bones_spr" src="assets/bones.png"></img>
+    <img id="crown_spr" src="assets/crown.png"></img>
+    <img id="thorns_spr" src="assets/thorns.png"></img>
   </body>
 </html>
 

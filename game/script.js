@@ -1,9 +1,8 @@
-var lang = "no" // "no" or "en"
 var daxtrot, p1, p2, ground, bg;
 var myScore, hiscorecomponent, hscorecolor;
 var rockbottom;
-var obstacles, curScore, ground_tiles;
-var runDist = 0;
+var obstacles, ground_tiles, backdrops, collectibles;
+var runDist, curScore, curCollected, jackpot ;
 const groundWt = 962 ;
 var p1Key = "KeyQ";
 var p2Key = "KeyP";
@@ -19,6 +18,11 @@ var c;
 var pkeychange = 1;
 var startscrn = true;
 var startbtn, changeInputCmp;
+
+// Get language from URL parameters
+const urlPara = new URLSearchParams(window.location.search);
+var lang = urlPara.get("lang");
+if (!lang) { lang = "no"; }
 
 function startScreen(scr, newHscore) {  
   
@@ -37,9 +41,14 @@ function startScreen(scr, newHscore) {
 
   startscrn = true;
   obstacles = [];
+  collectibles = [];
   ground_tiles = [];
+  backdrops = [];
   gameArea.frameNo = 0;
   curScore = 0;
+  runDist = 0;
+  curCollected = [];
+  jackpot = 0 // give bonus points here (eg. for collecting treasure)
 
   gameArea.start(startscrn);
   bg = new sprComponent(2412, 810, "bg_spr", 0, 1, 1, 1);
@@ -91,7 +100,7 @@ function startScreen(scr, newHscore) {
       lastscore.text = "Dære kræsja. Poeng: " + scr;
       startbtn.text = "Klikk for å spille";
       if (newHscore) {
-        hitext.text = "Gratulerer, ny rekord!"
+        hitext.text = "Gratulerer med ny rekord!"
         hitext.color = "orange";}
       else {
         hitext.text = "Bedre lykke neste gang!";
@@ -206,6 +215,7 @@ var gameArea = {
     this.canvas.width = 1280;
     this.canvas.height = 720;
     this.canvas.style = "padding: 5px; margin: auto; display: block; width: 1000px; height: 560px;";
+    this.canvas.style = "padding: 5px; margin: auto; display: block; max-width: 100%;";
     if(mobile){ 
       this.canvas.width = 1280;
       this.canvas.height = 500;
@@ -279,11 +289,12 @@ function hudComponent(width, height, sprite, startX, startY) {
 
 function sprComponent(width, height, sprite, collidebuffer, framelen, 
                       startX, startY) {
-  // sprites (daxtrot, players, obstacles)
+  // sprites (daxtrot, players, obstacles, collectibles)
   this.sprSheet = sprite // points to id sprite in style.css
   this.sprFrame = 0 // index in sprSheet of current frame (column in png)
   this.sprReel = 0 // current reel in sprSheet (row in png)
   this.frameLen = framelen // length of reels (before looping)
+  this.throttleAnim = false // prevent from animating
   // sprite size
   this.width = width; 
   this.height = height;
@@ -293,6 +304,8 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
   this.speedY = 0;    
   this.x = startX;
   this.y = startY;
+  // status switches
+  this.isVulturefodder = false; // if true, can be carried off screen
   // button status (for players)
   this.button = false // set true when button pushed
   this.crashWith = function(otherobj) {
@@ -335,18 +348,21 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
       this.y = rockbottom - this.height + this.sprBorder;
       this.speedY = 0; // don't fall through ground
       if (this == daxtrot) { // regulate speed if this is daxtrot
-        if(this.x > 20) { // fall back to left of screen
+        // daxtrot speed for held buttons
+        if (b1Held && b2Held && player1.onHound() && player2.onHound()) {
+          this.speedX = 2;
+          this.sprReel = 1;
+        }
+        // else if (((b2Held && player2.onHound()) || (b1Held && player1.onHound())) && this.x > 20) {
+        //   this.speedX = -2;
+        //   this.sprReel = 0;
+        else if(this.x > 20) // && (player1.onHound()==false) && (player2.onHound()==false))
+        { // fall back to left of screen
           this.speedX = -2;
-          if (this.sprReel != 0) {
-            this.frame = 0;
-          }
           this.sprReel = 0;
         }
         else { // cruising speed
           this.speedX = 0;
-          if (this.sprReel != 1) {
-            this.frame = 0;
-          }
           this.sprReel = 1;
         }
       }
@@ -399,13 +415,13 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
       }
     }
     else { // piece is in the air, apply gravity
-      if (this.y < 1) { // make sure we don't leave screen at top
+      if (this.y < 1 && this.isVulturefodder == false) { // don't leave screen
 	this.y = 1;
         if (this.speedY < 0) {
           this.speedY = 1;
         }
       }
-      if (this.x < 1) { // make sure we don't leave screen to the left
+      if (this.x < 1 && this.isVulturefodder == false) { // don't leave screen
 	this.x = 1;
         if (this.speedX < 0) {
           this.speedX = 0;
@@ -423,11 +439,13 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
 
   this.update = function() { // draw current sprite frame
     ctx = gameArea.context;
-    if (this.frameLen) { // this is a sprite with animation frames
+    if (this.frameLen) { // animated sprite
       if (everyinterval(7)) {
-        this.sprFrame+=1 // to next animation frame
-        if (this.sprFrame >= this.frameLen) { // cycle animation
-          this.sprFrame = 0;
+        if (!this.throttleAnim) {
+          this.sprFrame+=1 // to next animation frame
+          if (this.sprFrame >= this.frameLen) { // cycle animation
+            this.sprFrame = 0;
+          }
         }
       }
       var imgId = this.sprSheet
@@ -436,7 +454,6 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
       ctx.drawImage(document.getElementById(this.sprSheet),sx,sy,
 		    this.width,this.height,this.x,this.y,
 		    this.width,this.height);
-      
     }
   }
 }
@@ -452,127 +469,204 @@ function checkHiScore(thisscore) {
   }
 }
 
-function updateGameArea() {
+function updateGameArea() { // one game turn
   if (gameArea.pause) {return;}
-  var x;
   if (gameOver) { // kjøres ved game over, 1 gang
     gameArea.stop();
+    if (jackpot) {
+      curScore += jackpot;
+      jackpot = 0;
+    }
     startScreen(curScore, checkHiScore(curScore));
     gameOver = false;
     return;
   }
-  
-  if(gameArea.pause == false){
-    gameArea.clear();
-    var scoreInterval = 6 // increment score every N frames
-    var buttonInterval = 20 // reset button status every N frames
-    var hinderInterval = 200 // spawn hinder every N frames
-    let groundInterval = (groundWt / 4).toFixed(0) // spawn unending ground tiles
-    var paralaxInterval = 12 // scroll background
-    bg.update();
-    gameArea.frameNo += 1;
-    runDist += 1
-    // scroll background,
-    if (gameArea.frameNo == 1 || everyinterval(groundInterval)) {
-      ground_tiles.push(new sprComponent(962, 96, "ground_spr", 5,
-				         1, gameArea.canvas.width, rockbottom));
+  gameArea.clear();
+  var scoreInterval = 6 // increment score every N frames
+  var buttonInterval = 20 // reset button status every N frames
+  var paralaxInterval = 12 // scroll background
+  bg.update();
+  gameArea.frameNo += 1;
+  runDist += 1
+  // spawn backdrops and obstacles
+  rockMap.testCoord(runDist) 
+  // scroll ground tiles and backdrops
+  for (i = 0; i < ground_tiles.length; i+= 1) {
+    ground_tiles[i].x -= 3 ;
+    ground_tiles[i].update();
     }
-
-    // scroll ground and obstacles
-    for (i = 0; i < ground_tiles.length; i+= 1) {
-      ground_tiles[i].x -= 3 ;
-      ground_tiles[i].update();
+  for (i = 0; i < backdrops.length; i += 1) {
+    backdrops[i].x += -3;
+    if (backdrops[i].sprSheet == "tutorial_spr") { // animation sequence
+      if (backdrops[i].sprFrame > 3) {
+        if (backdrops[i].sprReel == 0) {
+          if (gameArea.frameNo > 200) {
+            backdrops[i].throttleAnim = false
+            backdrops[i].sprReel = 1 ; backdrops[i].sprFrame = 0;}
+          else {
+            backdrops[i].throttleAnim = true;
+          }
+        }
+        else {
+          backdrops[i].throttleAnim = true;}
+      }
+      else if (75 < gameArea.frameNo) {backdrops[i].throttleAnim = false; }
+      else {backdrops[i].throttleAnim = true};
     }
-    for (i = 0; i < obstacles.length; i += 1) {
-      obstacles[i].x += -3;
-      obstacles[i].update();
-      if (obstacles[i].sprSheet == "bird_spr") {
-        obstacles[i].x += -1;
-        obstacles[i].y += obstacles[i].speedY;
-        if (obstacles[i].y < obstacles[i].minY || obstacles[i].y > obstacles[i].maxY)
-        {
-          obstacles[i].speedY = - obstacles[i].speedY;
+    backdrops[i].update();
+  }
+  // scroll collectibles
+  for (i = 0; i < collectibles.length; i += 1) {
+    let pup = collectibles[i]
+    let collided = false
+    pup.x += -3;
+    if (pup.crashWith(player1)) {
+      collided = player1;
+    }
+    else if (pup.crashWith(player2)) {
+      collided = player2;
+    }
+    else if (pup.crashWith(daxtrot)) {
+      collided = daxtrot;
+    }
+    if (collided) {
+      if (pup.sprSheet == "crown_spr" && (collided != daxtrot)) {
+        jackpot += 200
+        collectibles.pop(i);
+        curCollected.push(pup);
+      };
+    }
+    pup.update()
+  };
+  // scroll obstacles
+  for (i = 0; i < obstacles.length; i += 1) {
+    let obs = obstacles[i]
+    obs.x += -3;
+    if (obs.sprSheet == "bird_spr") {
+      obs.x += -1;
+      obs.y += obs.speedY;
+      if (obs.y < obs.minY || obs.y > obs.maxY)
+      {
+        obs.speedY = - obs.speedY;
+      }
+      if (obs.crashWith(player1)) {
+        player1.speedY = -3;
+        player1.speedX = -5;
+      }
+      if (obs.crashWith(player2)) {
+        player2.speedY = -3;
+        player2.speedX = -5;
+      }
+    }
+    else if (obs.sprSheet == "vulture_spr") {
+      obs.centerX -= 3 // stay focused on spawned x-coord, scrolling
+      if (obs.crashWith(player1) || obs.crashWith(player2)) { // caught frog
+        obs.diving = true;
+        obs.speedX = -1;
+        obs.speedY = -4;
+        if (obs.crashWith(player1)) { // hold player1 in claws
+          player1.x = obs.x + 30; 
+          player1.y = obs.y + 40;
+          player1.isVulturefodder = true; // allow player to leave screen
         }
-        if (obstacles[i].crashWith(player1)) {
-          player1.speedY = -3;
-          player1.speedX = -5;
-        }
-        if (obstacles[i].crashWith(player2)) {
-          player2.speedY = -3;
-          player2.speedX = -5;
+        else if (obs.crashWith(player2)) { // hold player1 in claws
+          player2.x = obs.x + 30; 
+          player2.y = obs.y + 40;
+          player2.isVulturefodder = true;
         }
       }
-      if (obstacles[i].crashWith(daxtrot)) {
-        console.log("Crash")
-        gameOver = true // handle i neste frame
-      }
-    }
-    // move daxtrot and players
-    daxtrot.newPos(); daxtrot.update();
-    player1.newPos(); player1.update();
-    player2.newPos(); player2.update();
-    // spawn new obstacles: testing
-    
-    if (gameArea.frameNo == 1 || everyinterval(hinderInterval)) {
-      spawnType = Math.floor(Math.random() * 2) // which type of hinder
-      if (spawnType == 0) {
-        let x = gameArea.canvas.width;
-        let y = rockbottom - 55
-        obstacles.push(new sprComponent(64, 64, "hinder_spr", 5, 1, x, y));
-      }
-      else if (spawnType == 1) {
-        let x = gameArea.canvas.width;
-        let y = rockbottom - (50 + Math.floor(Math.random() *200))
-        nuObs=new sprComponent(54, 36, "bird_spr", 5, 4, x, y);
-        // attributes to fly up and down
-        let sverve = ((rockbottom - 60) - y) / 2
-        nuObs.maxY = y + sverve
-        nuObs.minY = y - sverve
-        if (nuObs.minY < 10) {
-          nuObs.minY = 10;
+      else if(!obs.diving) { // check if above vulnerable player avatar
+        if(obs.x-15<player1.x && obs.x+15>player1.x && !player1.onHound() && player1.y > obs.y) {
+          obs.diving = true; // try to snatch player 1
+          obs.speedY = 12;
+          obs.speedX = 0;
         }
-        if (Math.floor(Math.random() * 1)) { nuObs.speedY = -2; }
-        else { nuObs.speedY = 2; }
-        obstacles.push(nuObs)
+        else if(obs.x-15<player2.x && obs.x+15>player2.x && !player2.onHound() && player2.y > obs.y) {
+          obs.diving = true; // try to snatch player 1
+          obs.speedY = 12;
+        obs.speedX = 0;
+        }
       }
+      if (obs.diving) { // vulture diving to catch a frog
+        if (obs.y + obs.height > rockbottom) { // missed player, now fly away
+          obs.speedX = -1;
+          obs.speedY = -4;
+        }
+      }
+      else { // normal movement pattern
+        let maxY = obs.centerY + obs.sverve
+        let minY = obs.centerY - obs.sverve
+        let maxX = obs.centerX + obs.sverve * 2
+        let minX = obs.centerX - obs.sverve * 2
+        console.log("min/max",minX,minY,"/",maxX,maxY,"sverve:",obs.sverve,"pos:",obs.x,obs.y)
+        if (obs.y > maxY) {
+          obs.speedY = - 2;
+        }
+        else if (obs.y < minY) {
+          obs.speedY = 2;
+        }
+        if (obs.x > maxX) {
+          obs.speedX = -6;
+        }
+        else if (obs.x < minX) {
+          obs.speedX = 3;
+        }
+      };
+      // apply flying speed
+      obs.y += obs.speedY;
+      obs.x += obs.speedX;
+      if (obs.speedX <= 0) {
+        obs.sprReel = 0;}
+      else {
+        obs.sprReel = 1;}
     }
-    // reset button status
-    if (everyinterval(buttonInterval)) {
-      player1.button = false;
-      player2.button = false;
-    }
-    but1.update(b1Held);
-    but2.update(b2Held);
-    if(!mobile){
-      but1key.text = p1Key[3];
-      but1key.update();
-      but2key.text = p2Key[3];
-      but2key.update();
-    }
-    
-    // increment score
-    if (everyinterval(scoreInterval)) {
-      curScore = curScore + 1;
-    }
-    if (everyinterval(paralaxInterval)) {
-      bg.x -= 1;
-    }
-    myScore.text=curScore;
-    
-    
-    if(curScore>hiScore){
-      hiscorecomponent.text="🜲 " + curScore;
-      myScore.update("orange");
-      hiscorecomponent.update("orange");
-    }
-    else{
-      hiscorecomponent.text="🜲 " + hiScore;
-      myScore.update("black");
-      hiscorecomponent.update("black");
+    obs.update()
+    if (obs.crashWith(daxtrot)) {
+      console.log("Crash with "+obs.sprSheet)
+      gameOver = true // handle i neste frame
     }
   }
+  // move daxtrot and players
+  daxtrot.newPos(); daxtrot.update();
+  player1.newPos(); player1.update();
+  player2.newPos(); player2.update();
+    
+  // reset button status
+  if (everyinterval(buttonInterval)) {
+    player1.button = false;
+    player2.button = false;
+  }
+  but1.update(b1Held);
+  but2.update(b2Held);
+  if(!mobile){
+    but1key.text = p1Key[3];
+    but1key.update();
+    but2key.text = p2Key[3];
+    but2key.update();
+  }
+  // increment score
+  if (jackpot) { // just got bonus points
+    curScore ++;
+    jackpot --;
+  }
+  if (everyinterval(scoreInterval)) {
+    curScore = curScore + 1;
+  }
+  if (everyinterval(paralaxInterval)) {
+    bg.x -= 1;
+  }
+  myScore.text=curScore;
+  if(curScore>hiScore){
+    hiscorecomponent.text="🜲 " + curScore;
+    myScore.update("orange");
+    hiscorecomponent.update("orange");
+  }
+  else{
+    hiscorecomponent.text="🜲 " + hiScore;
+    myScore.update("black");
+    hiscorecomponent.update("black");
+  }
 }
-
 function everyinterval(n) {
   if ((gameArea.frameNo / n) % 1 == 0) {return true;}
   return false;
@@ -619,7 +713,6 @@ function butUp(keycode) {
     pThis.speedY = -9;
     pThis.speedX = 3;
   }
-  
 }
 
 function butDown(keycode) {
@@ -703,25 +796,19 @@ function touchHandle(){
       }
   }
 
-  // Touchend event - dersom vi skulle trenge å holde inne knappene f.eks. siden de nå bare funker med 'tap'*/
-
-/*   window.addEventListener('touchend', handleEndtouch, false);
-
+  // Touchend event - dersom vi skulle trenge å holde inne knappene f.eks. siden de nå bare funker med 'tap'
+  /*
+  window.addEventListener('touchend', handleEndtouch, false);
   function handleEndtouch(evt){
     evt.preventDefault();
     show.innerHTML = "tend";
   }
-
-   Klikkevent for samme greia. Brukes ikke nå, men i fall vi ønsker å bruke senere lagrer jeg den her
-   
-  /* window.addEventListener('click', canvclick, false);
-
-  function canvclick(e) {
-    
+  // Klikkevent for samme greia. Brukes ikke nå, men i fall vi ønsker å bruke senere lagrer jeg den her   
+  window.addEventListener('click', canvclick, false);
+  function canvclick(e) {    
     var pos = getMousePos(gamecanvas, e);
     posx = pos.x;
-    posy = pos.y;
-    
+    posy = pos.y;    
     if(mobile){
       if(posx>5 && posx<175 && posy<190 && posy>10)
       {
@@ -733,14 +820,154 @@ function touchHandle(){
         butDown(p2Key)
       }
     }
-  }
-
-
+  } 
   function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     return {
         x: (evt.clientX - rect.left) / (rect.right - rect.left) * canvas.width,
         y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
     };
-  }  */
+  } */ 
 }
+
+var rockMap = {
+  hinderInterval: 200,
+  groundInterval: (groundWt / 4).toFixed(0), // spawn unending ground tiles
+  randomInterval: 200,
+  testCoord : function(dist) {
+    var nuObs
+    // spawn ground sprites
+    if (gameArea.frameNo == 1 || everyinterval(this.groundInterval)) {
+      ground_tiles.push(new sprComponent(962, 96, "ground_spr", 5,
+				       1, gameArea.canvas.width, rockbottom));
+    }
+    // if (everyinterval(this.randomInterval)) {
+    //   spawnRandom();
+    // }
+    switch (dist) { // dist counted in pixels
+    case 1: // tutorial tree at position 1
+      console.log("We have contact.");
+      backdrops.push(new sprComponent(216, 205, "tutorial_spr", 5, 5, gameArea.canvas.width+50, rockbottom - 190));
+      break;
+    case 200:
+      spawnBird(200)
+      break;
+    case 350:
+      spawnHinder()
+      break;
+    case 700:
+      spawnHinder()
+      break;
+    case 850:
+      spawnBird(250)
+      break;
+    case 1100:
+      spawnCrownBones();
+      spawnVulture(250);
+      break;
+    case 1400:
+      spawnHinder()
+      break;
+    case 1590:
+      spawnThorns();
+      break;
+    case 1600:
+      spawnThorns();
+      break;
+    default: // fallback random generation
+      if (gameArea.frameNo > 1600 && everyinterval(200)) {
+        spawnRandom();
+      }
+    }
+  },
+}
+
+function spawnHinder(y,x) { // undeclared x,y to spawn on right side
+  if (!x) { x = gameArea.canvas.width; }
+  if (!y) { y = rockbottom - 55; }
+  obstacles.push(new sprComponent(64, 64, "hinder_spr", 5, 1, x, y));
+}
+function spawnThorns(y,x) { // undeclared x,y to spawn on right side
+  if (!x) { x = gameArea.canvas.width; }
+  if (!y) { y = rockbottom - 55; }
+  obstacles.push(new sprComponent(175, 75, "thorns_spr", 5, 1, x, y));
+}
+
+function spawnBird(y,x) {
+  //  var sverve
+  if (!x) { x = gameArea.canvas.width; }
+  if (!y) { y = rockbottom - (60 + Math.floor(Math.random() * 250)); }
+  nuObs = new sprComponent(54, 36, "bird_spr", 5, 4, x, y);
+  // attributes to fly up and down
+  var sverve = ((rockbottom - 60) - y) / 2
+  nuObs.maxY = y + sverve
+  nuObs.minY = y - sverve
+  if (nuObs.minY < 10) {
+    nuObs.minY = 10;
+  }
+  if (Math.floor(Math.random() * 1)) {
+    nuObs.speedY = -2;
+  }
+  else {
+    nuObs.speedY = 2;
+  };
+  obstacles.push(nuObs);
+}
+
+function spawnVulture(y,x) {
+  if (!x) { x = gameArea.canvas.width; }
+  if (!y) { y = rockbottom - (100 + Math.floor(Math.random() * 400)); }
+  let startY = y - ((rockbottom - 60 - y) / 3)
+  nuObs = new sprComponent(120, 100, "vulture_spr", 20, 4, x, startY);
+  nuObs.centerY = y // circle this point
+  nuObs.centerX = x // circle above this point
+  nuObs.sverve = (rockbottom - 60 - y) / 4
+  // if (startY - nuObs.sverve < 10) {
+  //   nuObs.sverve = startY - 10;}
+  console.log(nuObs.centerX,"/",nuObs.centerY,nuObs.sverve);
+  nuObs.speedX = -3
+  nuObs.speedY = 1
+  nuObs.diving = false; // if true, dive to catch a frog
+  obstacles.push(nuObs);
+}
+
+function spawnTalltrunk(y,x) {
+  if (!x) { x = gameArea.canvas.width; }
+  if (!y) { y = rockbottom - 300; }
+  nuObs = new sprComponent(143, 310, "talltrunk_spr", 1, 1, x, y);
+  backdrops.push(nuObs);
+}
+function spawnTallesttrunk(y,x) {
+  if (!x) { x = gameArea.canvas.width; }
+  if (!y) { y = rockbottom - 420; }
+  nuObs = new sprComponent(200, 434, "tallertrunk_spr", 1, 1, x, y);
+  backdrops.push(nuObs);
+}
+function spawnCrownBones(y,x) {
+  if (!x) { x = gameArea.canvas.width; }
+  if (!y) { y = rockbottom - 30 }
+  nuObs = new sprComponent(80, 40, "bones_spr", 1, 1, x, y);
+  backdrops.push(nuObs);
+  nuPup = new sprComponent(80, 40, "crown_spr", 1, 8, x, y);
+  collectibles.push(nuPup);
+}  
+
+function spawnRandom(y,x) {
+  /// test: random enemies
+  spawnType = Math.floor(Math.random() * 5) // which type of hinder
+  if (spawnType == 0) {
+    spawnHinder();
+  }
+  else if (spawnType == 1) {
+    spawnBird();
+  }
+  else if (spawnType == 2) {
+    spawnVulture();
+  }
+  else if (spawnType == 3) {
+    spawnThorns();
+  }
+  else if (spawnType == 4) {
+    spawnTallesttrunk();
+  }
+}  
