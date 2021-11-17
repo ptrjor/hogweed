@@ -15,7 +15,9 @@ var mobile = false;
 var lastscore, hitext;
 var k = 0;
 var c;
+var pkeychange = 1;
 var startscrn = true;
+var startbtn, changeInputCmp;
 
 // Get language from URL parameters
 const urlPara = new URLSearchParams(window.location.search);
@@ -23,6 +25,7 @@ var lang = urlPara.get("lang");
 if (!lang) { lang = "no"; }
 
 function startScreen(scr, newHscore) {  
+  
   if(screen.width<450){
     if (lang == "en") {
       document.getElementById("spilldiv").innerHTML = "Rotate screen and refresh to play.";
@@ -50,10 +53,29 @@ function startScreen(scr, newHscore) {
   gameArea.start(startscrn);
   bg = new sprComponent(2412, 810, "bg_spr", 0, 1, 1, 1);
   bg.update();
-  startbtn = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-150, gameArea.canvas.height/2);
-  if (lang=="en") {startbtn.text = "Click to play";}
-  else if (lang=="no") {startbtn.text = "Klikk for å spille";}
-  if(scr>0) // Viser score du fikk på forrige forsøk, dersom du nettopp tapte. Vises ikke om du
+  startbtn = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-180, gameArea.canvas.height/2);
+  if(!mobile){
+  p1keytext = new txtComponent("20px", "Consolas", "green", gameArea.canvas.width-400, gameArea.canvas.height-50);
+  p2keytext = new txtComponent("20px", "Consolas", "red", gameArea.canvas.width-200, gameArea.canvas.height-50);
+  changeInputCmp = new txtComponent("20px", "Consolas", "black", 50, gameArea.canvas.height-50);
+  }
+  if (lang=="en") {
+    startbtn.text = "Click to play"; 
+    if(!mobile){
+    changeInputCmp.text = "Click to change game buttons";
+    p1keytext.text = "Player 1: " + p1Key[3];
+    p2keytext.text = "Player 2: " + p2Key[3];
+    }
+}
+  else if (lang=="no") {
+  startbtn.text = "Klikk for å spille"; 
+  if(!mobile){
+  changeInputCmp.text = "Klikk for å endre spillknapper";
+  p1keytext.text = "Spiller 1: " + p1Key[3];
+  p2keytext.text = "Spiller 2: " + p2Key[3];
+  }
+}
+  if(scr>0) // Viser score du fikk på forrige forsøk, dersom du nettopp tapte. Vises ikke om du nettopp startet siden
   {
     if(mobile){
       lastscore = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-250, 50);
@@ -87,19 +109,81 @@ function startScreen(scr, newHscore) {
     lastscore.update();
     hitext.update();
   }
-  startbtn.update()
+  startbtn.update();
+  if(!mobile){
+  p1keytext.update();
+  p2keytext.update();
+  changeInputCmp.update();
+  }
   c = gameArea.canvas;
   c.addEventListener("click",handleclick,false);
 }
 
 function handleclick(e){
   e.preventDefault();
+  var rect = c.getBoundingClientRect();
+  var cx = e.clientX;
+  var cy = e.clientY;
+
+  var rectleft = rect.left.toFixed(0);
+  var recttop = rect.top.toFixed(0);
+
+  var x = cx-rectleft;
+  var y = cy-recttop
+  
+  if(x>35 && x<315 && y>510 && y<550 && mobile == false)
+  {
+    changeInput();
+    c.removeEventListener("click",handleclick)
+  }
+  else{
   startGame();
   c.removeEventListener("click",handleclick)
+}
+}
+
+function changeInput()
+{
+  pkeychange = 1;
+  bg.update();
+  if (lang=="en") {
+  startbtn.text = "Tap button for player 1, green. Default: Q"
+  }
+  else{
+  startbtn.text = "Trykk på knapp for spiller 1, grønn. Standard: Q"
+  }
+  startbtn.x = 100;
+  startbtn.update();
+  document.addEventListener('keydown',handleKeydown,false);  
+}
+
+function handleKeydown(event){
+  bg.update();
+  if(pkeychange == 1){
+    p1Key = event.code;
+    if(lang=="en"){
+    startbtn.text = "Player 1 key: " + p1Key[3] + ". Choose player 2 key."
+    } else{
+    startbtn.text = "Knapp for spiller 1: " + p1Key[3] + ". Velg knapp for spiller 2."
+    }
+    startbtn.update();
+    pkeychange = 2;
+  } else if(pkeychange == 2){
+    p2Key = event.code;
+    if(lang=="en"){
+    startbtn.text = "Player 2 key: " + p2Key[3] + ". Click to play";
+    } else{
+    startbtn.text = "Knapp for spiller 2: " + p2Key[3] + ". Klikk for å spille";
+    }
+    c.addEventListener("click",handleclick,false);
+    startbtn.update();
+    document.removeEventListener('keydown', handleKeydown);
+  }
 }
 
 function startGame() {
   startscrn = false;
+  keydownListeners();
   gameArea.start(startscrn);
   player1 = new sprComponent(62, 48, "player1_spr", 10, 7, 40, 400); 
   player2 = new sprComponent(62, 48, "player2_spr", 0, 7, 130, 400);
@@ -119,7 +203,9 @@ function startGame() {
     hiscorecomponent.y = 80;
     myScore = new txtComponent("30px", "Consolas", "black", 1135, 40);
     but1 = new hudComponent(56, 56, 'but1_spr', 10, gameArea.canvas.height-60);
+    but1key = new txtComponent("25px", "Consolas", "black", 32, gameArea.canvas.height-25);
     but2 = new hudComponent(56, 56,'but2_spr', gameArea.canvas.width-66,gameArea.canvas.height-60);
+    but2key = new txtComponent("25px", "Consolas", "black", gameArea.canvas.width-45, gameArea.canvas.height-25);
   }
 }
 
@@ -552,6 +638,12 @@ function updateGameArea() { // one game turn
   }
   but1.update(b1Held);
   but2.update(b2Held);
+  if(!mobile){
+    but1key.text = p1Key[3];
+    but1key.update();
+    but2key.text = p2Key[3];
+    but2key.update();
+  }
   // increment score
   if (jackpot) { // just got bonus points
     curScore ++;
@@ -581,8 +673,8 @@ function everyinterval(n) {
 }
 
 function butUp(keycode) {
-  if(keycode==p1Key){b1Held=false;but1.update(b1Held)}
-  if(keycode==p2Key){b2Held=false;but2.update(b2Held)}
+  if(keycode==p1Key){b1Held=false;but1.update(b1Held);if(!mobile){but1key.update()}}
+  if(keycode==p2Key){b2Held=false;but2.update(b2Held);if(!mobile){but2key.update()}}
   var pThis // which player just pressed their button
   var pOther // reference other player here
   if(keycode == p1Key && player1.onHound()) {
@@ -645,20 +737,23 @@ function accelX(piece, n) {
   piece.speedX = n;
 }
 
-document.addEventListener('keydown', (event) => {
-  butDown(event.code);
-}, false);  
+function keydownListeners(){
+    document.addEventListener('keydown', (event) => {
+      butDown(event.code);
+    }, false);  
+  
+    // Keyup-sjekker
+    document.addEventListener('keyup', (event) => {
+      butUp(event.code);
+      if(event.code == p1Key) {
+        b1Held = false;
+      }
+      else if(event.code == p2Key) {
+        b2Held = false;
+      }
+    }, false);
+  }
 
-  // Keyup-sjekker
-  document.addEventListener('keyup', (event) => {
-    butUp(event.code);
-    if(event.code == p1Key) {
-      b1Held = false;
-    }
-    else if(event.code == p2Key) {
-      b2Held = false;
-    }
-  }, false);
 
 // Nav-bar funksjoner
 function openNav() {
@@ -692,7 +787,7 @@ function touchHandle(){
     if(posx<175 && posy<190) // P1 Hopp dersom Q klikkes
       {
         butDown(p1Key)
-        but1.update(true)
+        but1.update(true);
       }
     if(posx>screen.width-180 && posy < 190) // P2 Hopp dersom P klikkes
       {
