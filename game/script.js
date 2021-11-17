@@ -56,6 +56,7 @@ function startScreen(scr, newHscore) {
   gameArea.start(startscrn);
   bg = new sprComponent(2412, 810, "bg_spr", 0, 1, 1, 1);
   bg.update();
+  rules = new txtComponent("35px", "Consolas", "blue", gameArea.canvas.width/2-400, gameArea.canvas.height/2-250);
   startbtn = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-180, gameArea.canvas.height/2);
   if(!mobile){
   p1keytext = new txtComponent("20px", "Consolas", "green", gameArea.canvas.width-400, gameArea.canvas.height-50);
@@ -64,16 +65,19 @@ function startScreen(scr, newHscore) {
   }
   if (lang=="en") {
     startbtn.text = "Click to play"; 
+    rules.x = gameArea.canvas.width/2-430;
+    rules.text = "Release buttons simultaneously to jump with Dax!";
     if(!mobile){
-    changeInputCmp.text = "Click to change game buttons";
+    changeInputCmp.text = "Change buttons";
     p1keytext.text = "Player 1: " + p1Key[3];
     p2keytext.text = "Player 2: " + p2Key[3];
     }
 }
   else if (lang=="no") {
   startbtn.text = "Klikk for å spille"; 
+  rules.text = "Slipp knappene samtidig for å hoppe med Dax!";
   if(!mobile){
-  changeInputCmp.text = "Klikk for å endre spillknapper";
+  changeInputCmp.text = "Endre spillknapper";
   p1keytext.text = "Spiller 1: " + p1Key[3];
   p2keytext.text = "Spiller 2: " + p2Key[3];
   }
@@ -100,6 +104,7 @@ function startScreen(scr, newHscore) {
       }
     }
     else if (lang=="no") {
+      rules.y = 50;
       lastscore.text = "Dere kræsja. Poeng: " + scr;
       startbtn.text = "Klikk for å spille";
       if (newHscore) {
@@ -113,6 +118,7 @@ function startScreen(scr, newHscore) {
     hitext.update();
   }
   startbtn.update();
+  rules.update();
   if(!mobile){
   p1keytext.update();
   p2keytext.update();
@@ -156,6 +162,7 @@ function changeInput()
   startbtn.text = "Trykk på knapp for spiller 1, grønn. Standard: Q"
   }
   startbtn.x = 100;
+  startbtn.color = "green";
   startbtn.update();
   document.addEventListener('keydown',handleKeydown,false);  
 }
@@ -167,13 +174,13 @@ function handleKeydown(event){
           // Trykt knapp må være en bokstavknapp
           p1Key = event.code;
           localStorage.setItem('config_p1', p1Key)        
-          console.log("P1 key now: "+p1Key)
         if(lang=="en"){
         startbtn.text = "Player 1 key: " + p1Key[3] + ". Choose player 2 key."
         } else{
         startbtn.text = "Knapp for spiller 1: " + p1Key[3] + ". Velg knapp for spiller 2."
         }
         startbtn.x = 100;
+        startbtn.color = "red";
         startbtn.update();
         pkeychange = 2;
       } else {
@@ -413,7 +420,7 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
           this.sprReel = 1;
         }
         else if (this.x > daxtrot.x) {
-          this.speedX = -4;
+          this.speedX = -7;
           if (this.sprReel != 2) { // run left animation
             this.sprFrame = 0; }
           this.sprReel = 2;
