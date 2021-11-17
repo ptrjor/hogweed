@@ -100,7 +100,7 @@ function startScreen(scr, newHscore) {
       }
     }
     else if (lang=="no") {
-      lastscore.text = "Dære kræsja. Poeng: " + scr;
+      lastscore.text = "Dere kræsja. Poeng: " + scr;
       startbtn.text = "Klikk for å spille";
       if (newHscore) {
         hitext.text = "Gratulerer med ny rekord!"
