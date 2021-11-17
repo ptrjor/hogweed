@@ -130,8 +130,8 @@ function handleclick(e){
 
   var x = cx-rectleft;
   var y = cy-recttop
-  
-  if(x>35 && x<315 && y>510 && y<550 && mobile == false)
+  console.log("clicked: " + x + " y: " + y)
+  if(x<410 && y>600 && mobile == false)
   {
     changeInput();
     c.removeEventListener("click",handleclick)
@@ -160,26 +160,60 @@ function changeInput()
 function handleKeydown(event){
   bg.update();
   if(pkeychange == 1){
-    p1Key = event.code;
-    if(lang=="en"){
-    startbtn.text = "Player 1 key: " + p1Key[3] + ". Choose player 2 key."
-    } else{
-    startbtn.text = "Knapp for spiller 1: " + p1Key[3] + ". Velg knapp for spiller 2."
-    }
-    startbtn.update();
-    pkeychange = 2;
-  } else if(pkeychange == 2){
-    p2Key = event.code;
-    if(lang=="en"){
-    startbtn.text = "Player 2 key: " + p2Key[3] + ". Click to play";
-    } else{
-    startbtn.text = "Knapp for spiller 2: " + p2Key[3] + ". Klikk for å spille";
-    }
-    c.addEventListener("click",handleclick,false);
-    startbtn.update();
-    document.removeEventListener('keydown', handleKeydown);
-  }
-}
+      if (String.fromCharCode(event.keyCode).match(/(\w|\s)/g)) {
+          // Trykt knapp må være en bokstavknapp
+          p1Key = event.code;
+          console.log(p1Key)
+        if(lang=="en"){
+        startbtn.text = "Player 1 key: " + p1Key[3] + ". Choose player 2 key."
+        } else{
+        startbtn.text = "Knapp for spiller 1: " + p1Key[3] + ". Velg knapp for spiller 2."
+        }
+        startbtn.x = 100;
+        startbtn.update();
+        pkeychange = 2;
+      } else {
+        // Andre knapper som esc, ctrl osv. funker ikke
+        if(lang=="en"){
+          startbtn.text = "Key " + event.code + " is not a valid character."
+          } else{
+          startbtn.text = "Knapp " + event.code + " er ikke en gyldig knapp."
+          }
+          startbtn.x = 200;
+          startbtn.update();
+      }
+    } 
+  else if(pkeychange == 2){
+    if(event.code == p1Key){
+      if(lang=="en"){
+        startbtn.text = "Player 2 key cannot be the same as Player 1";
+        } else{
+        startbtn.text = "Knapp for spiller 2 kan ikke være samme som spiller 1";
+        }
+        startbtn.x = 50;
+        startbtn.update();
+    } 
+    else{
+        if (String.fromCharCode(event.keyCode).match(/(\w|\s)/g)) {
+        p2Key = event.code;
+        if(lang=="en"){
+        startbtn.text = "Player 2 key: " + p2Key[3] + ". Click to play";
+        } else{
+        startbtn.text = "Knapp for spiller 2: " + p2Key[3] + ". Klikk for å spille";
+        }
+        c.addEventListener("click",handleclick,false);
+        startbtn.x = 100;
+        startbtn.update();
+        document.removeEventListener('keydown', handleKeydown);
+      } else{
+        if(lang=="en"){
+          startbtn.text = "Key " + event.code + " is not a valid character."
+          } else{
+          startbtn.text = "Knapp " + event.code + " er ikke en gyldig knapp."
+          }
+          startbtn.x = 200;
+          startbtn.update();
+    }}}}
 
 function startGame() {
   startscrn = false;
