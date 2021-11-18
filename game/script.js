@@ -58,9 +58,9 @@ function startScreen(scr, newHscore) {
   bg.update();
   startbtn = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-180, gameArea.canvas.height/2);
   if(!mobile){
-  p1keytext = new txtComponent("20px", "Consolas", "green", gameArea.canvas.width-400, gameArea.canvas.height-50);
-  p2keytext = new txtComponent("20px", "Consolas", "red", gameArea.canvas.width-200, gameArea.canvas.height-50);
-  changeInputCmp = new txtComponent("20px", "Consolas", "black", 50, gameArea.canvas.height-50);
+    p1keytext = new txtComponent("20px", "Consolas", "green", gameArea.canvas.width-400, gameArea.canvas.height-50);
+    p2keytext = new txtComponent("20px", "Consolas", "red", gameArea.canvas.width-200, gameArea.canvas.height-50);
+    changeInputCmp = new txtComponent("20px", "Consolas", "black", 50, gameArea.canvas.height-50);
   }
   if (lang=="en") {
     startbtn.text = "Click to play"; 
@@ -69,15 +69,15 @@ function startScreen(scr, newHscore) {
     p1keytext.text = "Player 1: " + p1Key[3];
     p2keytext.text = "Player 2: " + p2Key[3];
     }
-}
-  else if (lang=="no") {
-  startbtn.text = "Klikk for å spille"; 
-  if(!mobile){
-  changeInputCmp.text = "Klikk for å endre spillknapper";
-  p1keytext.text = "Spiller 1: " + p1Key[3];
-  p2keytext.text = "Spiller 2: " + p2Key[3];
   }
-}
+  else if (lang=="no") {
+    startbtn.text = "Klikk for å spille"; 
+    if(!mobile){
+      changeInputCmp.text = "Klikk for å endre spillknapper";
+      p1keytext.text = "Spiller 1: " + p1Key[3];
+      p2keytext.text = "Spiller 2: " + p2Key[3];
+    }
+  }
   if(scr>0) // Viser score du fikk på forrige forsøk, dersom du nettopp tapte. Vises ikke om du nettopp startet siden
   {
     if(mobile){
@@ -100,8 +100,8 @@ function startScreen(scr, newHscore) {
       }
     }
     else if (lang=="no") {
-      lastscore.text = "Dære kræsja. Poeng: " + scr;
-      startbtn.text = "Klikk for å spille";
+      lastscore.text = "Daxtrot kræsja. " + scr + " poeng";
+      startbtn.text = "Klikk for å spille igjen";
       if (newHscore) {
         hitext.text = "Gratulerer med ny rekord!"
         hitext.color = "orange";}
@@ -114,9 +114,9 @@ function startScreen(scr, newHscore) {
   }
   startbtn.update();
   if(!mobile){
-  p1keytext.update();
-  p2keytext.update();
-  changeInputCmp.update();
+    p1keytext.update();
+    p2keytext.update();
+    changeInputCmp.update();
   }
   c = gameArea.canvas;
   c.addEventListener("click",handleclick,false);
@@ -127,10 +127,10 @@ function handleclick(e){
   var rect = c.getBoundingClientRect();
   var cx = e.clientX;
   var cy = e.clientY;
-
+    
   var rectleft = rect.left.toFixed(0);
   var recttop = rect.top.toFixed(0);
-
+    
   var x = cx-rectleft;
   var y = cy-recttop
   console.log("clicked: " + x + " y: " + y)
@@ -140,9 +140,9 @@ function handleclick(e){
     c.removeEventListener("click",handleclick)
   }
   else{
-  startGame();
-  c.removeEventListener("click",handleclick)
-}
+    startGame();
+    c.removeEventListener("click",handleclick)
+  }
 }
 
 function changeInput()
@@ -784,7 +784,7 @@ function butDown(keycode) {
     b2Held = true;
   }
 
-  if(mobile){butUp(keycode)}
+  // if(mobile){butUp(keycode)}
 }
 
 // Hoppefunksjon, y-verdi, oppover
@@ -822,8 +822,21 @@ function openNav() {
 }
 
 function closeNav() {
+  console.log("he")
   document.getElementById("mySidenav").style.width = "0";
   gameArea.pause = false;
+}
+
+function swapLang() {
+  if (lang=="en") { lang="no"; }
+  else if (lang=="no") { lang="en"; }
+  window.location.search["lang"] = lang;
+  var l = lang
+  fetchNavbar(l); // funker?
+  console.log("Pause status = "+gameArea.pause)
+  if (!runDist) { // not currently playing a game
+    window.location.href=("?lang="+lang); // reload page
+  }
 }
 
 // Under er eventlistenere som gir mobil-touch funksjonalitet
@@ -843,7 +856,6 @@ function touchHandle(){
       butDown(p2Key)
       but2.update(true)
     }
-
     if(posx<175 && posy<190) // P1 Hopp dersom Q klikkes
       {
         butDown(p1Key)
@@ -857,13 +869,32 @@ function touchHandle(){
   }
 
   // Touchend event - dersom vi skulle trenge å holde inne knappene f.eks. siden de nå bare funker med 'tap'
-  /*
   window.addEventListener('touchend', handleEndtouch, false);
   function handleEndtouch(evt){
     evt.preventDefault();
+    posx = evt.changedTouches[0].clientX.toFixed(2);
+    posy = evt.changedTouches[0].clientY.toFixed(2);
+    
+    // if(evt.targetTouches.length == 0 and b1Held && b2Held) // begge slapp knappen, 
+    // {
+    //   butUp(p1Key)
+    //   but1.update(true)
+    //   butUp(p2Key)
+    //   but2.update(true)
+    // }
+    if(posx<175 && posy<190 && b1Held) // P1 Hopp dersom Q klikkes
+      {
+        butUp(p1Key)
+        but1.update(true);
+      }
+    else if(posx>screen.width-180 && posy < 190 && b2Held) // P2 Hopp dersom P klikkes
+      {
+        butUp(p2Key)
+        but2.update(true);
+      }
     show.innerHTML = "tend";
   }
-  // Klikkevent for samme greia. Brukes ikke nå, men i fall vi ønsker å bruke senere lagrer jeg den her   
+  /* Klikkevent for samme greia. Brukes ikke nå, men i fall vi ønsker å bruke senere lagrer jeg den her   
   window.addEventListener('click', canvclick, false);
   function canvclick(e) {    
     var pos = getMousePos(gamecanvas, e);

@@ -35,14 +35,17 @@ function fetchContent() {
   loadFile(navNav+"_"+navLang+".html")
 }
 
-function fetchNavbar() {
+function fetchNavbar(locale) {
   var fileName
   const urlPara = new URLSearchParams(window.location.search);
   let navLang = urlPara.get("lang");
-  if (navLang == "en") {
+  if (locale) {
+    fileName = "navbar_"+locale+".html";
+  }
+  else if (navLang == "en") {
     fileName = "navbar_en.html";
   }
-  else { // else if (naviLang == "no") {
+  else { 
     fileName = "navbar_no.html";
   }
   navreader.open('get', fileName, true);
