@@ -56,50 +56,49 @@ function startScreen(scr, newHscore) {
   gameArea.start(startscrn);
   bg = new sprComponent(2412, 810, "bg_spr", 0, 1, 1, 1);
   bg.update();
-  rules = new txtComponent("35px", "Consolas", "blue", gameArea.canvas.width/2-400, gameArea.canvas.height/2-250);
-  startbtn = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-180, gameArea.canvas.height/2);
+  rulesA = new txtComponent("35px", "Consolas", "blue", gameArea.canvas.width/2-500, 100);
+  rulesB = new txtComponent("35px", "Consolas", "blue", gameArea.canvas.width/2-340, 160);
+  startbtn = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-160, gameArea.canvas.height/2);
   if(!mobile){
     p1keytext = new txtComponent("20px", "Consolas", "green", gameArea.canvas.width-400, gameArea.canvas.height-50);
     p2keytext = new txtComponent("20px", "Consolas", "red", gameArea.canvas.width-200, gameArea.canvas.height-50);
     changeInputCmp = new txtComponent("20px", "Consolas", "black", 50, gameArea.canvas.height-50);
   }
   if (lang=="en") {
-    startbtn.text = "Click to play"; 
-    rules.x = gameArea.canvas.width/2-430;
-    rules.text = "Release buttons simultaneously to jump with Dax!";
+    startbtn.text = "Click to play";
+    rulesA.x = gameArea.canvas.width/2 - 360
+    rulesB.x = gameArea.canvas.width/2-500;  
+    rulesA.text = "Press and release buttons to jump …";
+    rulesB.text = "Release buttons simultaneously to jump with the Dax!";
     if(!mobile){
-    changeInputCmp.text = "Change buttons";
-    p1keytext.text = "Player 1: " + p1Key[3];
-    p2keytext.text = "Player 2: " + p2Key[3];
+      changeInputCmp.text = "Change buttons";
+      p1keytext.text = "Player 1: " + p1Key[3];
+      p2keytext.text = "Player 2: " + p2Key[3];
     }
   }
   else if (lang=="no") {
-<<<<<<< HEAD
-    startbtn.text = "Klikk for å spille"; 
+    startbtn.text = "Klikk for å spille";
+    rulesA.text = "Trykk og slipp knappene for å hoppe …";
+    rulesB.text = "Slipp knappene samtidig for å hoppe med Dax!";
     if(!mobile){
-      changeInputCmp.text = "Klikk for å endre spillknapper";
+      changeInputCmp.text = "Endre spillknapper";
       p1keytext.text = "Spiller 1: " + p1Key[3];
       p2keytext.text = "Spiller 2: " + p2Key[3];
     }
-=======
-  startbtn.text = "Klikk for å spille"; 
-  rules.text = "Slipp knappene samtidig for å hoppe med Dax!";
-  if(!mobile){
-  changeInputCmp.text = "Endre spillknapper";
-  p1keytext.text = "Spiller 1: " + p1Key[3];
-  p2keytext.text = "Spiller 2: " + p2Key[3];
->>>>>>> main
   }
   if(scr>0) // Viser score du fikk på forrige forsøk, dersom du nettopp tapte. Vises ikke om du nettopp startet siden
   {
+    startbtn.y = gameArea.canvas.height / 2 + 100
     if(mobile){
-      lastscore = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-250, 50);
+      rulesA.text = "" // suppress to save screen real estate
+      rulesB.y = 30
+      lastscore = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-250, 130);
     } else{
-      lastscore = new txtComponent("40px", "Consolas", "brown", 420, 150);
+      lastscore = new txtComponent("40px", "Consolas", "brown", 420, gameArea.canvas.height/2 - 70);
     }
     hitext = new txtComponent("40px", "Consolas", "brown",
                               gameArea.canvas.width/2-220,
-                              gameArea.canvas.height/2-100);
+                              gameArea.canvas.height/2);
     if (lang=="en") {
       lastscore.text = "Game over. Score: " + scr;
       startbtn.text = "Click to play";
@@ -112,14 +111,8 @@ function startScreen(scr, newHscore) {
       }
     }
     else if (lang=="no") {
-<<<<<<< HEAD
-      lastscore.text = "Daxtrot kræsja. " + scr + " poeng";
-      startbtn.text = "Klikk for å spille igjen";
-=======
-      rules.y = 50;
       lastscore.text = "Dere kræsja. Poeng: " + scr;
       startbtn.text = "Klikk for å spille";
->>>>>>> main
       if (newHscore) {
         hitext.text = "Gratulerer med ny rekord!"
         hitext.color = "orange";}
@@ -131,7 +124,8 @@ function startScreen(scr, newHscore) {
     hitext.update();
   }
   startbtn.update();
-  rules.update();
+  rulesA.update();
+  rulesB.update();
   if(!mobile){
     p1keytext.update();
     p2keytext.update();
@@ -169,10 +163,10 @@ function changeInput()
   pkeychange = 1;
   bg.update();
   if (lang=="en") {
-  startbtn.text = "Tap button for player 1, green. Default: Q"
+  startbtn.text = "Choose button for player 1, green. Default: Q"
   }
   else{
-  startbtn.text = "Trykk på knapp for spiller 1, grønn. Standard: Q"
+  startbtn.text = "Velg knapp for spiller 1, grønn. Standard: Q"
   }
   startbtn.x = 100;
   startbtn.color = "green";
@@ -188,9 +182,9 @@ function handleKeydown(event){
           p1Key = event.code;
           localStorage.setItem('config_p1', p1Key)        
         if(lang=="en"){
-        startbtn.text = "Player 1 key: " + p1Key[3] + ". Choose player 2 key."
+        startbtn.text = "Choose button for player 1, green. Default: P"
         } else{
-        startbtn.text = "Knapp for spiller 1: " + p1Key[3] + ". Velg knapp for spiller 2."
+        startbtn.text = "Velg knapp for spiller 2, rød. Standard:P"
         }
         startbtn.x = 100;
         startbtn.color = "red";
@@ -247,7 +241,7 @@ function startGame() {
   player1 = new sprComponent(62, 48, "player1_spr", 10, 7, 40, 400); 
   player2 = new sprComponent(62, 48, "player2_spr", 0, 7, 130, 400);
   daxtrot = new sprComponent(256, 96, "daxtrot_spr", 20, 4, 10, 850);
-  hiscorecomponent = new txtComponent("30px", "Consolas", "black", 1100, 70);
+  hiscorecomponent = new txtComponent("30px", "Consolas", "black", 1100, 170);
   if(mobile){
     touchHandle();
     hiscorecomponent.width = "40px";
@@ -832,8 +826,8 @@ function keydownListeners(){
         b2Held = false;
       }
     }, false);
-  }
-
+}
+  
 
 // Nav-bar funksjoner
 function openNav() {
