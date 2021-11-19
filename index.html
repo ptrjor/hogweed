@@ -9,18 +9,33 @@
   <body>
     <script src="languages.js"></script>
     <script src="game/script.js"></script> 
+    <div class="flex" id="spilldiv"></div> <!-- game canvas -->
+    <div id="mySidenav" class="sidenav">
+      <!-- load from languages.js or fallback to: -->
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a> 
+      <a href="game/game.html?lang=no">
+        <img src="game/assets/dog_btn.png" class="menuicon"> Nytt spill</a><br>
+      <a href="index.html?nav=info&lang=no">
+        <img src="game/assets/hog_btn.png" class="menuicon"> Info</a><br>
+      <!-- a href="?lang=en">
+        <img src="game/assets/sprog_btn.png" class="menuicon">English</a -->
+    </div>
+    <div id="spandiv"><span id="navigasjon"
+                            onclick="openNav()">&#9776</span></div >
+    <div class="grid-container" id="article">
+      <div class="grid-item">
+        Siden bruker javascript-funksjoner som er avhengig av en
+        konfigurert server for å vises riktig. <br><br>
+        Vennligst naviger til
+        <a href="https://folk.ntnu.no/simebh/hogweed/daxtrot/">
+        https://folk.ntnu.no/simebh/hogweed/daxtrot/ </a>
+        <br><br>
+        (Bytt ut tekst før mandag.)
+      </div>
+    </div>      
     <script>
       fetchContent(); // url element, by language
       fetchNavbar();
     </script>
-
-    <div class="flex" id="spilldiv"></div> <!-- game canvas -->
-    <div id="mySidenav" class="sidenav"></div> <!-- from languages.js -->
-    <div id="spandiv"><span id="navigasjon"
-                            onclick="openNav()">&#9776</span></div >
-    <!--  div id="article"></div -->
-    <div class="grid-container" id="article">
-      <!-- div class="grid-item"> ... </div -->
-    </div>
   </body>
 </html>

@@ -12,13 +12,17 @@ function loadFile(fileName) {
 function displayArticle() {
   if(artreader.readyState==4) {
     var el = document.getElementById('article');
-    el.innerHTML = artreader.responseText;
+    if (artreader.responseText) { // else fallback to local text
+      el.innerHTML = artreader.responseText;
+    }
   }
 }
 function displayNavbar() {
   if(navreader.readyState==4) {
     var el = document.getElementById('mySidenav');
-    el.innerHTML = navreader.responseText;
+    if (navreader.responseText) { // else fallback to local text
+      el.innerHTML = navreader.responseText;
+    }
   }
 }
 

@@ -10,7 +10,16 @@
     <script src="script.js"></script>
     <script src="../languages.js"></script>
     <script>fetchNavbar()</script>
-    <div id="mySidenav" class="sidenav"></div>
+    <div id="mySidenav" class="sidenav">
+      <!-- load from ../languages.js or fallback to: -->
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a> 
+      <a href="game.html?lang=no">
+        <img src="assets/dog_btn.png" class="menuicon"> Nytt spill</a><br>
+      <a href="../index.html?nav=info&lang=no">
+        <img src="assets/hog_btn.png" class="menuicon"> Info</a><br>
+      <!-- a href="?lang=en">
+        <img src="game/assets/sprog_btn.png" class="menuicon">English</a -->
+    </div>
     <div id="spandiv"><span id="navigasjon"
                             onclick="openNav()">&#9776</span></div >
     <div class="flex" id="spilldiv"></div>

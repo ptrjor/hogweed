@@ -56,8 +56,7 @@ function startScreen(scr, newHscore) {
   gameArea.start(startscrn);
   bg = new sprComponent(2412, 810, "bg_spr", 0, 1, 1, 1);
   bg.update();
-  rulesA = new txtComponent("35px", "Consolas", "blue", gameArea.canvas.width/2-500, 100);
-  rulesB = new txtComponent("35px", "Consolas", "blue", gameArea.canvas.width/2-340, 160);
+  rules = new txtComponent("35px", "Consolas", "blue", gameArea.canvas.width/2-340, 160);
   startbtn = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-160, gameArea.canvas.height/2);
   if(!mobile){
     p1keytext = new txtComponent("20px", "Consolas", "green", gameArea.canvas.width-400, gameArea.canvas.height-50);
@@ -66,10 +65,8 @@ function startScreen(scr, newHscore) {
   }
   if (lang=="en") {
     startbtn.text = "Click to play";
-    rulesA.x = gameArea.canvas.width/2 - 360
-    rulesB.x = gameArea.canvas.width/2-500;  
-    rulesA.text = "Press and release buttons to jump …";
-    rulesB.text = "Release buttons simultaneously to jump with the Dax!";
+    rules.x = gameArea.canvas.width/2-500;  
+    rules.text = "Release buttons simultaneously to jump with the Dax!";
     if(!mobile){
       changeInputCmp.text = "Change buttons";
       p1keytext.text = "Player 1: " + p1Key[3];
@@ -78,8 +75,7 @@ function startScreen(scr, newHscore) {
   }
   else if (lang=="no") {
     startbtn.text = "Klikk for å spille";
-    rulesA.text = "Trykk og slipp knappene for å hoppe …";
-    rulesB.text = "Slipp knappene samtidig for å hoppe med Dax!";
+    rules.text = "Slipp knappene samtidig for å hoppe med Dax!";
     if(!mobile){
       changeInputCmp.text = "Endre spillknapper";
       p1keytext.text = "Spiller 1: " + p1Key[3];
@@ -90,8 +86,7 @@ function startScreen(scr, newHscore) {
   {
     startbtn.y = gameArea.canvas.height / 2 + 100
     if(mobile){
-      rulesA.text = "" // suppress to save screen real estate
-      rulesB.y = 30
+      rules.y = 30
       lastscore = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-250, 130);
     } else{
       lastscore = new txtComponent("40px", "Consolas", "brown", 420, gameArea.canvas.height/2 - 70);
@@ -111,7 +106,7 @@ function startScreen(scr, newHscore) {
       }
     }
     else if (lang=="no") {
-      lastscore.text = "Dere kræsja. Poeng: " + scr;
+      lastscore.text = "Daxtrot kræsja. Poeng: " + scr;
       startbtn.text = "Klikk for å spille";
       if (newHscore) {
         hitext.text = "Gratulerer med ny rekord!"
@@ -124,8 +119,7 @@ function startScreen(scr, newHscore) {
     hitext.update();
   }
   startbtn.update();
-  rulesA.update();
-  rulesB.update();
+  rules.update();
   if(!mobile){
     p1keytext.update();
     p2keytext.update();
