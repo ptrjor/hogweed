@@ -1,7 +1,10 @@
 /* Under er css for tekst og bilder */
 
 #logo {
-    width: 200px;
+    width: 150px;
+    display: inline-block;
+    align-self: center;
+    padding: 5px;
 }
 
 #navigasjon {
@@ -17,12 +20,33 @@
 
 .grid-container {
     display: grid;
-    grid-column-gap: 50px;
+    grid-column-gap: 30px;
     grid-template-columns: auto auto;
     padding: 10px;
-    align-items: center;
+    float: top; 
+}
+
+#infoextra{
+    font-size: 50%;
+}
+
+#infodiv{
+    margin-left: 3em;
+    margin-right: 3em;
 }
   
+#infodiv2{
+    margin-left: 3em;
+    margin-right: 3em;
+    font-size: 20px;
+    line-height: 1.6;
+}
+
+#bld
+{
+    font-weight: bold;
+}
+
 .grid-item {
     padding: 20px;
     font-size: 30px;
@@ -30,16 +54,22 @@
 }
 
 .grid-item img {
-    float: left;
+    float: center;
     padding: 0 0 0 0;
-    margin-right: 1em;
-    width: 10em;
+    margin-right: 2em;
+    width: 7em;
+}
+
+#processimg1
+{
+    width: 60%;
 }
 
 .grid-bio {
-    padding: 20px;
-    font-size: 30px;
+    padding: 10px;
+    font-size: 20px;
     text-align: center;
+    line-height: 1.2;
 }
 .grid-bio img {
     float: left;
@@ -73,7 +103,7 @@
     font-size: large;
     color: green;
 }
-pp
+
 #p2
 {
     padding: 5px;
@@ -97,7 +127,7 @@ body {
     z-index: 1;
     top: 5%;
     left: 0;
-    background-color: rgb(255, 255, 225, 90%);
+    background-color: rgba(255, 255, 255, 0.9);
     overflow-x: hidden;
     transition: 0.5s;
     padding-top: 60px;

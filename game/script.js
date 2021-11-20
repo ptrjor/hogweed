@@ -57,7 +57,7 @@ function startScreen(scr, newHscore) {
   gameArea.start(startscrn);
   bg = new sprComponent(2412, 810, "bg_spr", 0, 1, 1, 1);
   bg.update();
-  rules = new txtComponent("35px", "Consolas", "blue", gameArea.canvas.width/2-340, 160);
+  rules = new txtComponent("35px", "Consolas", "blue", gameArea.canvas.width/2-380, 160);
   startbtn = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-160, gameArea.canvas.height/2);
   if(!mobile){
     p1keytext = new txtComponent("20px", "Consolas", "green", gameArea.canvas.width-400, gameArea.canvas.height-50);
@@ -109,12 +109,16 @@ function startScreen(scr, newHscore) {
     else if (lang=="no") {
       lastscore.text = "Daxtrot kræsja. Poeng: " + scr;
       startbtn.text = "Klikk for å spille igjen";
+      c.addEventListener("touchstart", handleclick);
+      lastscore.x = gameArea.canvas.width/2-270;
+      startbtn.x = gameArea.canvas.width/2-250;
       if (newHscore) {
         hitext.text = "Gratulerer med ny rekord!"
         hitext.color = "orange";}
       else {
         hitext.text = "Bedre lykke neste gang!";
       }
+      hitext.x = gameArea.canvas.width/2-230;
     }
     lastscore.update();
     hitext.update();
@@ -132,6 +136,10 @@ function startScreen(scr, newHscore) {
 
 function handleclick(e){
   e.preventDefault();
+  if(mobile){
+    c.removeEventListener("touchstart", handleclick)
+    startGame();
+  }else{
   var rect = c.getBoundingClientRect();
   var cx = e.clientX;
   var cy = e.clientY;
@@ -150,7 +158,7 @@ function handleclick(e){
   else{
     c.removeEventListener("click",handleclick);
     startGame();
-  }
+  }}
 }
 
 function changeInput()
@@ -163,7 +171,7 @@ function changeInput()
   else{
     startbtn.text = "Velg knapp for grønn spiller. Standard: Q"
   }
-  startbtn.x = 100;
+  startbtn.x = 150;
   startbtn.color = "green";
   startbtn.update();
   document.addEventListener('keydown',handleKeydown,false);  
@@ -181,7 +189,7 @@ function handleKeydown(event){
         } else{
         startbtn.text = "Velg knapp for rød spiller. Standard: P"
         }
-        startbtn.x = 100;
+        startbtn.x = 150;
         startbtn.color = "red";
         startbtn.update();
         pkeychange = 2;
@@ -216,7 +224,7 @@ function handleKeydown(event){
         startbtn.text = "Klikk for å spille";
         }
         c.addEventListener("click",handleclick,false);
-        startbtn.x = 100;
+        startbtn.x = gameArea.canvas.width/2-180;
         startbtn.update();
         document.removeEventListener('keydown', handleKeydown);
       } else{
@@ -253,8 +261,8 @@ function startGame() {
     hiscorecomponent.y = 40;
     myScore = new txtComponent("40px", "Consolas", "black",
                                gameArea.canvas.width/2 - 30, 40);
-    but1 = new hudComponent(168, 168, 'but1big_spr', 10, 10);
-    but2 = new hudComponent(168, 168,'but2big_spr', gameArea.canvas.width-180,10);
+    but1 = new hudComponent(168, 168, 'but1big_spr', 10, 150);
+    but2 = new hudComponent(168, 168,'but2big_spr', gameArea.canvas.width-180,150);
   } else{
     hiscorecomponent.x = 1100;
     hiscorecomponent.y = 80;
