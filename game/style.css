@@ -400,6 +400,26 @@ canvas {
     background-image: url(assets/fruit_spike.png);
     visibility: hidden;
 }
+#spikebuff_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 8px;
+    width: 18px;
+    background-image: url(assets/buff_spike.png);
+    visibility: hidden;
+}
+#speedbuff_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 8px;
+    width: 18px;
+    background-image: url(assets/buff_speed.png);
+    visibility: hidden;
+}
 
 button
 {

@@ -2,7 +2,7 @@ var daxtrot, p1, p2, ground, bg;
 var myScore, hiscorecomponent, hscorecolor;
 var rockbottom;
 var obstacles, ground_tiles, backdrops, collectibles;
-var garbageObs, garbageTil, garbageBac, garbageCol;
+var garbageObs, garbageBac, garbageCol;
 var runDist, curScore, curCollected, jackpot ;
 const groundWt = 962 ;
 var b1Held = false;
@@ -46,7 +46,7 @@ function startScreen(scr, newHscore) {
   startscrn = true;
   obstacles = []; garbageObs = [];
   collectibles = []; garbageCol = [];
-  ground_tiles = []; garbageTil = [];
+  ground_tiles = []; 
   backdrops = []; garbageBac = [];
   gameArea.frameNo = 0;
   curScore = 0;
@@ -363,6 +363,7 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
   this.y = startY;
   // status switches
   this.isVulturefodder = false; // if true, can be carried off screen
+  this.isDead = false; // set true for obstacles that get defeated
   // button status (for players)
   this.button = false // set true when button pushed
   this.crashWith = function(otherobj) {
@@ -473,7 +474,7 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
       this.y = daxtrot.y - (this.height / 1.5) + daxtrot.sprBorder
       this.speedY = daxtrot.speedY;
       this.speedX = daxtrot.speedX;
-      this.vultureFodder = false;
+      this.isVulturefodder = false;
       if (this.sprReel != 0) {
         this.sprReel = 0;
       }
@@ -506,6 +507,11 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
 
   this.update = function() { // draw current sprite frame
     ctx = gameArea.context;
+    if (this.isDead) { // playing death animation
+      this.x += this.speedX;
+      this.y += this.speedY;
+      this.speedY += 1;
+    }
     if (this.frameLen) { // animated sprite
       if (everyinterval(7) && !speedScroll) {
         if (!this.throttleAnim) {
@@ -521,8 +527,27 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
       ctx.drawImage(document.getElementById(this.sprSheet),sx,sy,
 		    this.width,this.height,this.x,this.y,
 		    this.width,this.height);
+      if (this.buffy && gameArea.frameNo % 20 < 10) { // blinking icon
+        var icoX = (this.x + this.width) - 24
+        var icoY = this.y - 24
+        ctx.drawImage(document.getElementById("spikebuff_spr"),icoX,icoY);
+      }
+      else if (this.speedy && gameArea.frameNo % 20 < 10) { // blinking icon
+        var icoX = (this.x + this.width) - 24
+        var icoY = this.y - 24
+        ctx.drawImage(document.getElementById("speedbuff_spr"),icoX,icoY);
+      }
     }
   }
+
+  this.gotDestroyed = function() { // call when obstacles get knocked out
+    jackpot += 100;
+    this.isDead = true;
+    this.throttleAnim = true;
+    this.speedX = 5;
+    this.speedY = -9;
+  }
+  
   this.countFlags = function() {
     if (this.speedy) {
       this.speedy -= 1;
@@ -577,7 +602,7 @@ function updateGameArea() { // one game turn
   }
   gameArea.clear();
   var scoreInterval = 6 // increment score every N frames
-  var buttonInterval = 20 // reset button status every N frames
+  var buttonInterval = 30 // reset button status every N frames
   var paralaxInterval = 12 // scroll background
   bg.update();
   gameArea.frameNo += 1;
@@ -656,7 +681,7 @@ function updateGameArea() { // one game turn
     let obs = obstacles[i]
     obs.x += -3;
     if (obs.sprSheet == "bird_spr") {
-      if (!speedScroll) {
+      if (!speedScroll && !obs.isDead) {
         obs.x += -1;
         obs.y += obs.speedY;
         if (obs.y < obs.minY || obs.y > obs.maxY)
@@ -665,8 +690,7 @@ function updateGameArea() { // one game turn
         }
         if (obs.crashWith(player1)) {
           if (player1.buffy) {
-            // add destroy animation
-            garbageObs.push(obs);
+            obs.gotDestroyed(); // add destroy animation
           }
           else {
             player1.speedY = -3;
@@ -675,8 +699,7 @@ function updateGameArea() { // one game turn
         }
         if (obs.crashWith(player2)) {
           if (player2.buffy) {
-            // add destroy animation
-            garbageObs.push(obs);
+            obs.gotDestroyed(); // add destroy animation
           }
           else {
             player2.speedY = -3;
@@ -687,14 +710,14 @@ function updateGameArea() { // one game turn
     }
     else if (obs.sprSheet == "vulture_spr") {
       obs.centerX -= 3 // stay focused on spawned x-coord, scrolling
-      if (!speedScroll) {
+      if (!speedScroll && !obs.isDead) {
         if (obs.crashWith(player1) || obs.crashWith(player2)) { // caught frog
           obs.diving = true;
           obs.speedX = -1;
           obs.speedY = -4;
           if (obs.crashWith(player1)) { // hold player1 in claws
             if (player1.buffy) {
-              garbageObs.push(obs);
+              obs.gotDestroed();
             }
             else {
               player1.x = obs.x + 30; 
@@ -702,9 +725,9 @@ function updateGameArea() { // one game turn
               player1.isVulturefodder = true; // allow player to leave screen
             }
           }
-          else if (obs.crashWith(player2)) { // hold player1 in claws
+          else if (obs.crashWith(player2)) { 
             if (player2.buffy) {
-              garbageObs.push(obs);
+              obs.gotDestroyed();
             }
             else {
               player2.x = obs.x + 30; 
@@ -758,18 +781,19 @@ function updateGameArea() { // one game turn
           obs.sprReel = 1;}
       }
     }
-    if (obs.x < - obs.width * 2) {
+    if (obs.x < - obs.width * 2 || obs.y > gameArea.canvas.height) {
       garbageObs.push(obs);
     }
     obs.update()
-    if (obs.crashWith(daxtrot) && (!daxtrot.buffy)) {
+    if (obs.crashWith(daxtrot) && (!daxtrot.buffy) && (!obs.isDead)) {
       console.log("Crash with "+obs.sprSheet)
       gameOver = true // handle i neste frame
     }
-    else if((obs.crashWith(daxtrot) && daxtrot.buffy) ||
-            (obs.crashWith(player1) && player1.buffy) ||
-            (obs.crashWith(player2) && player2.buffy)) {
-      garbageObs.push(obs)
+    else if(!obs.isDead &&
+            ((obs.crashWith(daxtrot) && daxtrot.buffy) ||
+             (obs.crashWith(player1) && player1.buffy) ||
+             (obs.crashWith(player2) && player2.buffy))) {
+      obs.gotDestroyed()
     }
   }
   // move daxtrot and players
@@ -1044,6 +1068,9 @@ var rockMap = {
     // A. Tutorial area
     case 1: // tutorial tree at position 1
       backdrops.push(new sprComponent(216, 205, "tutorial_spr", 5, 5, gameArea.canvas.width+50, rockbottom - 190));
+      break;
+    case 100:
+      spawnBird(350)
       break;
     case 500:
       spawnHinder()
