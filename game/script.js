@@ -2,6 +2,7 @@ var daxtrot, p1, p2, ground, bg;
 var myScore, hiscorecomponent, hscorecolor;
 var rockbottom;
 var obstacles, ground_tiles, backdrops, collectibles;
+var garbageObs, garbageTil, garbageBac, garbageCol;
 var runDist, curScore, curCollected, jackpot ;
 const groundWt = 962 ;
 var b1Held = false;
@@ -38,15 +39,15 @@ function startScreen(scr, newHscore) {
     }
     return
   } else if(screen.width>450 && screen.width<922){
+    scrh = screen.height -10
     mobile = true;
-    document.getElementById("navigasjon").style = "position: absolute; font-size: 120%; top: 40%; margin-left: 103%; text-align: center;";
   } // Dette betyr at det sannsynligvis er en rotert mobilskjerm
 
   startscrn = true;
-  obstacles = [];
-  collectibles = [];
-  ground_tiles = [];
-  backdrops = [];
+  obstacles = []; garbageObs = [];
+  collectibles = []; garbageCol = [];
+  ground_tiles = []; garbageTil = [];
+  backdrops = []; garbageBac = [];
   gameArea.frameNo = 0;
   curScore = 0;
   runDist = 0;
@@ -96,7 +97,7 @@ function startScreen(scr, newHscore) {
                               gameArea.canvas.height/2);
     if (lang=="en") {
       lastscore.text = "Game over. Score: " + scr;
-      startbtn.text = "Click to play";
+      startbtn.text = "Click to play again";
       if (newHscore) {
         hitext.x = gameArea.canvas.width/2-330;
         hitext.text = "Congratulations, new high score!"
@@ -107,7 +108,7 @@ function startScreen(scr, newHscore) {
     }
     else if (lang=="no") {
       lastscore.text = "Daxtrot kræsja. Poeng: " + scr;
-      startbtn.text = "Klikk for å spille";
+      startbtn.text = "Klikk for å spille igjen";
       if (newHscore) {
         hitext.text = "Gratulerer med ny rekord!"
         hitext.color = "orange";}
@@ -139,16 +140,16 @@ function handleclick(e){
   var recttop = rect.top.toFixed(0);
     
   var x = cx-rectleft;
-  var y = cy-recttop
-  console.log("clicked: " + x + " y: " + y)
+  var y = cy-recttop;
+  console.log("clicked: " + x + " y: " + y);
   if(x<410 && y>600 && mobile == false)
   {
     changeInput();
-    c.removeEventListener("click",handleclick)
+    c.removeEventListener("click",handleclick);
   }
   else{
+    c.removeEventListener("click",handleclick);
     startGame();
-    c.removeEventListener("click",handleclick)
   }
 }
 
@@ -157,10 +158,10 @@ function changeInput()
   pkeychange = 1;
   bg.update();
   if (lang=="en") {
-  startbtn.text = "Choose button for player 1, green. Default: Q"
+    startbtn.text = "Green player, press your key. Default: Q"
   }
   else{
-  startbtn.text = "Velg knapp for spiller 1, grønn. Standard: Q"
+    startbtn.text = "Velg knapp for grønn spiller. Standard: Q"
   }
   startbtn.x = 100;
   startbtn.color = "green";
@@ -176,9 +177,9 @@ function handleKeydown(event){
           p1Key = event.code;
           localStorage.setItem('config_p1', p1Key)        
         if(lang=="en"){
-        startbtn.text = "Choose button for player 1, green. Default: P"
+        startbtn.text = "Red player, press your key. Default: P"
         } else{
-        startbtn.text = "Velg knapp for spiller 2, rød. Standard:P"
+        startbtn.text = "Velg knapp for rød spiller. Standard: P"
         }
         startbtn.x = 100;
         startbtn.color = "red";
@@ -212,7 +213,7 @@ function handleKeydown(event){
         if(lang=="en"){
         startbtn.text = "Player 2 key: " + p2Key[3] + ". Click to play";
         } else{
-        startbtn.text = "Knapp for spiller 2: " + p2Key[3] + ". Klikk for å spille";
+        startbtn.text = "Klikk for å spille";
         }
         c.addEventListener("click",handleclick,false);
         startbtn.x = 100;
@@ -226,7 +227,10 @@ function handleKeydown(event){
           }
           startbtn.x = 200;
           startbtn.update();
-    }}}}
+      }
+    }
+  }
+}
 
 function startGame() {
   startscrn = false;
@@ -235,6 +239,12 @@ function startGame() {
   player1 = new sprComponent(62, 48, "player1_spr", 10, 7, 40, 400); 
   player2 = new sprComponent(62, 48, "player2_spr", 0, 7, 130, 400);
   daxtrot = new sprComponent(256, 96, "daxtrot_spr", 20, 4, 10, 850);
+  player1.speedy = 0; player1.buffy = 0; // powerups
+  player2.speedy = 0; player2.buffy = 0; // powerups
+  daxtrot.speedy = 0; daxtrot.buffy = 0; // powerups
+  if (p1Key == "KeyD") { // wizard mode for testing
+    daxtrot.buffy = 1000000000;
+  }
   hiscorecomponent = new txtComponent("30px", "Consolas", "black", 1100, 170);
   if(mobile){
     touchHandle();
@@ -261,15 +271,15 @@ var gameArea = {
   start : function(startscrn) {
     this.canvas.width = 1280;
     this.canvas.height = 720;
-    this.canvas.style = "padding: 5px; margin: auto; display: block; width: 1000px; height: 560px;";
-    this.canvas.style = "padding: 5px; margin: auto; display: block; max-width: 100%;";
+    // this.canvas.style = "padding: 5px; margin: auto; display: block; width: 1000px; height: 560px;";
+    this.canvas.style = "padding: 5px; margin: auto; display: block; max-width: 100%; height: 100%";
     if(mobile){ 
-      this.canvas.width = 1280;
-      this.canvas.height = 500;
       this.canvas.style = "width: 100%";
+      this.canvas.style = "max-height: 100%";
+      document.getElementById("navigasjon").style = "position: absolute; font-size: 200%; top:200%; left: 10px; text-align: left;";
     }
     else {
-      document.getElementById("navigasjon").style = "position: absolute; font-size: top: 30; left: 10; text-align: center;" //    hiscorecomponent = new txtComponent("30px", "Consolas", "black", 1100, 50, 40);
+      document.getElementById("navigasjon").style = "position: absolute; top: 30; left: 10; text-align: center;"
     }
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.getElementById("spilldiv"));  
@@ -399,6 +409,9 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
         if (b1Held && b2Held && player1.onHound() && player2.onHound()) {
           this.speedX = 2;
           this.sprReel = 1;
+          if (this.speedy) {
+            this.speedX = 4;
+          }
         }
         // else if (((b2Held && player2.onHound()) || (b1Held && player1.onHound())) && this.x > 20) {
         //   this.speedX = -2;
@@ -407,6 +420,9 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
         { // fall back to left of screen
           this.speedX = -2;
           this.sprReel = 0;
+          if (this.speedy) {
+            this.speedX = -4;
+          }
         }
         else { // cruising speed
           this.speedX = 0;
@@ -481,6 +497,9 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
 
   this.newPos = function() {
     this.x += this.speedX;
+    if (this.speedy && (!this.onHound()) && (this != daxtrot)) { // extra boost
+      this.x += this.speedX / 2;
+    }
     this.y += this.speedY; 
     this.applyGravity();
   }
@@ -503,6 +522,17 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
 		    this.width,this.height,this.x,this.y,
 		    this.width,this.height);
     }
+  }
+  this.countFlags = function() {
+    if (this.speedy) {
+      this.speedy -= 1;
+      if (this.speedy < 1 && (this == daxtrot)) { // restore scrolling speed
+        clearInterval(gameArea.interval, gameArea.start.interval);
+        gameArea.interval = setInterval(updateGameArea, 20);
+      }
+
+    }
+    if (this.buffy) {this.buffy -= 1;};
   }
 }
 
@@ -538,7 +568,12 @@ function updateGameArea() { // one game turn
   else if(speedScroll && daxtrot.x < daxtrot.width/2) {
     speedScroll = false;
     clearInterval(gameArea.interval, gameArea.start.interval);
-    gameArea.interval = setInterval(updateGameArea, 20);
+    if (daxtrot.speedy) {
+      gameArea.interval = setInterval(updateGameArea, 10);
+    }
+    else {
+      gameArea.interval = setInterval(updateGameArea, 20);
+    }
   }
   gameArea.clear();
   var scoreInterval = 6 // increment score every N frames
@@ -572,6 +607,9 @@ function updateGameArea() { // one game turn
       else if (75 < gameArea.frameNo) {backdrops[i].throttleAnim = false; }
       else {backdrops[i].throttleAnim = true};
     }
+    if (backdrops[i].x < - backdrops[i].width * 2) { // out of screen
+     garbageBac.push(backdrops[i]);
+    }
     backdrops[i].update();
   }
   // scroll collectibles
@@ -589,11 +627,27 @@ function updateGameArea() { // one game turn
       collided = daxtrot;
     }
     if (collided) {
-      if (pup.sprSheet == "crown_spr" && (collided != daxtrot)) {
-        jackpot += 250
-        collectibles.pop(i);
+      console.log("collide: "+collided.sprSheet)
+      if (pup.sprSheet == "spikefruit_spr") {
+        collided.buffy = 500;
+        garbageCol.push(pup);
+      }
+      else if (pup.sprSheet == "speedfruit_spr") {
+        collided.speedy = 500;
+        if (collided == daxtrot) {
+          clearInterval(gameArea.interval, gameArea.start.interval);
+          gameArea.interval = setInterval(updateGameArea, 10);
+        }
+        garbageCol.push(pup);
+      }
+      else if (pup.sprSheet == "crown_spr" && (collided != daxtrot)) {
+        jackpot += 250;
         curCollected.push(pup);
+        garbageCol.push(pup);
       };
+    }
+    else if (pup.x < - pup.width * 2) {
+      garbageCol.push(pup);
     }
     pup.update()
   };
@@ -610,12 +664,24 @@ function updateGameArea() { // one game turn
           obs.speedY = - obs.speedY;
         }
         if (obs.crashWith(player1)) {
-          player1.speedY = -3;
-          player1.speedX = -5;
+          if (player1.buffy) {
+            // add destroy animation
+            garbageObs.push(obs);
+          }
+          else {
+            player1.speedY = -3;
+            player1.speedX = -5;
+          }
         }
         if (obs.crashWith(player2)) {
-          player2.speedY = -3;
-          player2.speedX = -5;
+          if (player2.buffy) {
+            // add destroy animation
+            garbageObs.push(obs);
+          }
+          else {
+            player2.speedY = -3;
+            player2.speedX = -5;
+          }
         }
       }
     }
@@ -627,14 +693,24 @@ function updateGameArea() { // one game turn
           obs.speedX = -1;
           obs.speedY = -4;
           if (obs.crashWith(player1)) { // hold player1 in claws
-            player1.x = obs.x + 30; 
-            player1.y = obs.y + 40;
-            player1.isVulturefodder = true; // allow player to leave screen
+            if (player1.buffy) {
+              garbageObs.push(obs);
+            }
+            else {
+              player1.x = obs.x + 30; 
+              player1.y = obs.y + 40;
+              player1.isVulturefodder = true; // allow player to leave screen
+            }
           }
           else if (obs.crashWith(player2)) { // hold player1 in claws
-            player2.x = obs.x + 30; 
-            player2.y = obs.y + 40;
-            player2.isVulturefodder = true;
+            if (player2.buffy) {
+              garbageObs.push(obs);
+            }
+            else {
+              player2.x = obs.x + 30; 
+              player2.y = obs.y + 40;
+              player2.isVulturefodder = true;
+            }
           }
         }
         else if(!obs.diving) { // check if above vulnerable player avatar
@@ -682,10 +758,18 @@ function updateGameArea() { // one game turn
           obs.sprReel = 1;}
       }
     }
+    if (obs.x < - obs.width * 2) {
+      garbageObs.push(obs);
+    }
     obs.update()
-    if (obs.crashWith(daxtrot)) {
+    if (obs.crashWith(daxtrot) && (!daxtrot.buffy)) {
       console.log("Crash with "+obs.sprSheet)
       gameOver = true // handle i neste frame
+    }
+    else if((obs.crashWith(daxtrot) && daxtrot.buffy) ||
+            (obs.crashWith(player1) && player1.buffy) ||
+            (obs.crashWith(player2) && player2.buffy)) {
+      garbageObs.push(obs)
     }
   }
   // move daxtrot and players
@@ -695,9 +779,9 @@ function updateGameArea() { // one game turn
     player2.x-=3 ; player2.update();
   }
   else {
-    daxtrot.newPos(); daxtrot.update();
-    player1.newPos(); player1.update();
-    player2.newPos(); player2.update();
+    daxtrot.newPos(); daxtrot.update(); daxtrot.countFlags(); 
+    player1.newPos(); player1.update(); player1.countFlags(); 
+    player2.newPos(); player2.update(); player2.countFlags(); 
   }
   // reset button status
   if (everyinterval(buttonInterval)) {
@@ -711,7 +795,7 @@ function updateGameArea() { // one game turn
     but1key.update();
     but2key.text = p2Key[3];
     but2key.update();
-  }
+  } 
   // increment score
   if (jackpot) { // just got bonus points
     curScore ++;
@@ -734,6 +818,20 @@ function updateGameArea() { // one game turn
     myScore.update("black");
     hiscorecomponent.update("black");
   }
+
+  // collect garbage/items to delete from game
+  for (i = 0; i < garbageObs.length; i++) {
+    obstacles.splice(obstacles.indexOf(garbageObs[i]),1);
+  }
+  for (i = 0; i < garbageBac.length; i++) {
+    backdrops.splice(backdrops.indexOf(garbageBac[i]),1);
+  }
+  for (i = 0; i < garbageCol.length; i++) {
+    collectibles.splice(collectibles.indexOf(garbageCol[i]),1);
+  }
+  garbageObs = [];
+  garbageBac = [];
+  garbageCol = [];
 }
 function everyinterval(n) {
   if ((gameArea.frameNo / n) % 1 == 0) {return true;}
@@ -882,7 +980,6 @@ function touchHandle(){
     evt.preventDefault();
     posx = evt.changedTouches[0].clientX.toFixed(2);
     posy = evt.changedTouches[0].clientY.toFixed(2);
-    
     // if(evt.targetTouches.length == 0 and b1Held && b2Held) // begge slapp knappen, 
     // {
     //   butUp(p1Key)
@@ -940,43 +1037,74 @@ var rockMap = {
       ground_tiles.push(new sprComponent(962, 96, "ground_spr", 5,
 				       1, gameArea.canvas.width, rockbottom));
     }
-    // if (everyinterval(this.randomInterval)) {
-    //   spawnRandom();
-    // }
-    switch (dist) { // dist counted in pixels
+
+    // MAP GENERATION
+    switch (dist) { // Running distance counted in pixels
+      // at cruise speed, Dax covers 2600 dist per minute
+    // A. Tutorial area
     case 1: // tutorial tree at position 1
-      console.log("We have contact.");
       backdrops.push(new sprComponent(216, 205, "tutorial_spr", 5, 5, gameArea.canvas.width+50, rockbottom - 190));
       break;
-    case 200:
-      spawnBird(200)
-      break;
-    case 350:
+    case 500:
       spawnHinder()
       break;
-    case 700:
+    case 800:
       spawnHinder()
       break;
-    case 850:
-      spawnBird(250)
+    case 900:
+      spawnBird(230)
       break;
-    case 1100:
-      spawnCrownBones();
-      spawnVulture(250);
+    case 1050:
+      spawnThorns()
       break;
-    case 1400:
-      spawnHinder()
+    case 1250:
+      spawnSpeedTree()
       break;
-    case 1590:
-      spawnThorns();
+    case 1500:
+      spawnVulture(50)
       break;
     case 1600:
       spawnThorns();
       break;
-    default: // fallback random generation
-      if (gameArea.frameNo > 1600 && everyinterval(200)) {
-        spawnRandom();
-      }
+    case 1620:
+      spawnThorns();
+      break;
+    case 1800:
+      spawnHinder();
+      break;
+    // case 1950:
+    //  spawnBird(400);
+    //  break;
+    case 2100:
+      spawnSpikeTree();
+      break;
+    case 2350:
+      spawnVulture(100);
+      break;
+    case 2500:
+      spawnThorns();
+      break;
+    // ca. 500 points and 1 minute at 2600
+    case 2700:
+      spawnBird();
+      break;
+    // B. Treasure Area
+    case 3000:
+      spawnTreeCrown();
+      break;
+    case 4300:
+      spawnCrownBones();
+      spawnVulture(250);
+      break;
+    // vulture over thorns, somehow
+    // spiketree with flock of monsters behind (low flying birds?)
+    case 6600:
+      // spawn ThirdTreasure();
+      break;
+    // random generation
+    // default: 
+    //  if (gameArea.frameNo > 1600 && everyinterval(200)) {
+    //  spawnRandom();
     }
   },
 }
@@ -1046,6 +1174,33 @@ function spawnCrownBones(y,x) {
   if (!x) { x = gameArea.canvas.width; }
   if (!y) { y = rockbottom - 30 }
   nuObs = new sprComponent(80, 40, "bones_spr", 1, 1, x, y);
+  backdrops.push(nuObs);
+  nuPup = new sprComponent(80, 40, "crown_spr", 1, 8, x, y);
+  collectibles.push(nuPup);
+}  
+
+function spawnSpeedTree(y,x) {
+  if (!x) { x = gameArea.canvas.width; }
+  if (!y) { y = rockbottom - 300 }
+  nuObs = new sprComponent(143, 310, "talltrunk_spr", 1, 1, x, y);
+  backdrops.push(nuObs);
+  nuPup = new sprComponent(49, 117, "speedfruit_spr", 1, 1, x, y);
+  collectibles.push(nuPup);
+}  
+
+function spawnSpikeTree(y,x) {
+  if (!x) { x = gameArea.canvas.width; }
+  if (!y) { y = rockbottom - 420; }
+  nuObs = new sprComponent(200, 434, "tallertrunk_spr", 1, 1, x, y);
+  backdrops.push(nuObs);
+  nuPup = new sprComponent(31, 58, "spikefruit_spr", 1, 1, x, y);
+  collectibles.push(nuPup);
+}  
+
+function spawnTreeCrown(y,x) {
+  if (!x) { x = gameArea.canvas.width; }
+  if (!y) { y = rockbottom - 420; }
+  nuObs = new sprComponent(200, 434, "tallertrunk_spr", 1, 1, x, y);
   backdrops.push(nuObs);
   nuPup = new sprComponent(80, 40, "crown_spr", 1, 8, x, y);
   collectibles.push(nuPup);

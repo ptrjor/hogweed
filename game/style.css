@@ -73,7 +73,7 @@
     font-size: large;
     color: green;
 }
-
+pp
 #p2
 {
     padding: 5px;
@@ -143,8 +143,7 @@ body {
   @media screen and (max-height: 450px) {
     .sidenav {padding-top: 15px;}
     .sidenav a {font-size: 18px;}
-  }
-
+  
   @media screen and (max-width: 922px) {
     .grid-container {
         grid-template-columns: auto;
@@ -167,13 +166,20 @@ body {
         display: none;
         visibility: hidden;
     }
+/*
+    .sidenav .menuicon {
+        position: absolute;
+        left: 1em;
+        bottom: 1em;
+        max-width: 3em;
+        padding: 1em;
+        vertical-align: bottom; 
+    }
+*/
     @media (orientation: landscape){
     }
-
   }
-
-
-
+  }
 /* Under er css relatert til spillet */
 
 canvas {
@@ -372,6 +378,26 @@ canvas {
     height: 64px;
     width: 120px;
     background-image: url(assets/crown.png);
+    visibility: hidden;
+}
+#speedfruit_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 49px;
+    width: 117px;
+    background-image: url(assets/fruit_speed.png);
+    visibility: hidden;
+}
+#spikefruit_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 31px;
+    width: 58px;
+    background-image: url(assets/fruit_spike.png);
     visibility: hidden;
 }
 
