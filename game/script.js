@@ -11,7 +11,7 @@ const gravity = 0.2;
 var gameOver = false;
 var victory = false;
 var mobile = false;
-var speedScroll = false; // til true når daxtrot når skjermenden
+var speedScroll = false;
 var lastscore, hitext;
 var k = 0;
 var c;
@@ -32,10 +32,10 @@ if (!lang) { lang = "no"; }
 function startScreen(scr, newHscore) {    
   if(screen.width<450){
     if (lang == "en") {
-      document.getElementById("spilldiv").innerHTML = "Rotate screen and refresh to play.";
+      document.getElementById("spilldiv").innerHTML = "Rotate screen and refresh, then zoom out to play.";
     }
     else if (lang == "no") {
-      document.getElementById("spilldiv").innerHTML = "Roter skjermen og oppdater nettsiden for å spille.";
+      document.getElementById("spilldiv").innerHTML = "Roter skjermen og oppdater nettsiden, så zoom ut for å spille.";
     }
     return
   } else if(screen.width>450 && screen.width<922){
@@ -89,11 +89,28 @@ function startScreen(scr, newHscore) {
       p2keytext.text = "Spiller 2: " + p2Key[3];
     }
   }
-  if(scr>0) // Viser score du fikk på forrige forsøk, dersom du nettopp tapte. Vises ikke om du nettopp startet siden
+  if(mobile){
+    rules.y = 550;
+    rules.update();
+  }
+  if(scr>0) // Game over skjerm. Kjøres dersom du nettopp tapte. Vises ikke om du nettopp lastet siden
   {
+    
+    if(!mobile){ // Gjør at knappene ikke vises i menyen om man trykker på dem
+    but1.width = 0;
+    but1.height = 0;
+    but2.width = 0;
+    but2.height = 0;
+    but1key.width = "0px";
+    but2key.width = "0px";
+    but2key.update();
+    but1key.update();
+    but1.update();
+    but2.update();
+    }
+    
     startbtn.y = gameArea.canvas.height / 2 + 100
     if(mobile){
-      rules.y = 30
       lastscore = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-250, 130);
     } else{
       lastscore = new txtComponent("40px", "Consolas", "brown", 420, gameArea.canvas.height/2 - 70);
@@ -112,9 +129,10 @@ function startScreen(scr, newHscore) {
     else if (lang=="no") {
       lastscore.text = "Daxtrot kræsja. Poeng: " + scr;
       startbtn.text = "Klikk for å spille igjen";
-      c.addEventListener("touchstart", handleclick);
+      
       lastscore.x = gameArea.canvas.width/2-270;
       startbtn.x = gameArea.canvas.width/2-250;
+      
       if (newHscore) {
         hitext.text = "Gratulerer med ny rekord!"
         hitext.color = "orange";}
@@ -123,8 +141,13 @@ function startScreen(scr, newHscore) {
       }
       hitext.x = gameArea.canvas.width/2-230;
     }
+    if(mobile){
+    lastscore.y = gameArea.canvas.height/2-100;
+    c.addEventListener("touchstart", handleclick);
+    }
     lastscore.update();
     hitext.update();
+    
   }
   startbtn.update();
   rules.update();
@@ -152,7 +175,6 @@ function handleclick(e){
     
   var x = cx-rectleft;
   var y = cy-recttop;
-  console.log("clicked: " + x + " y: " + y);
   if(x<410 && y>600 && mobile == false)
   {
     changeInput();
@@ -253,9 +275,6 @@ function startGame() {
   player1.speedy = 0; player1.buffy = 0; // powerups
   player2.speedy = 0; player2.buffy = 0; // powerups
   daxtrot.speedy = 0; daxtrot.buffy = 0; // powerups
-  if (p1Key == "KeyD") { // wizard mode for testing
-    daxtrot.buffy = 1000000000;
-  }
   hiscorecomponent = new txtComponent("30px", "Consolas", "black", 1100, 170);
   if(mobile){
     touchHandle();
@@ -263,7 +282,7 @@ function startGame() {
     hiscorecomponent.x = 2 * gameArea.canvas.width/3 + 30;
     hiscorecomponent.y = 40;
     myScore = new txtComponent("40px", "Consolas", "black",
-                               gameArea.canvas.width/2 - 30, 40);
+    gameArea.canvas.width/2 - 30, 40);
     but1 = new hudComponent(168, 168, 'but1big_spr', 10, 150);
     but2 = new hudComponent(168, 168,'but2big_spr', gameArea.canvas.width-180,150);
   } else{
@@ -282,19 +301,18 @@ var gameArea = {
   start : function(startscrn) {
     this.canvas.width = 1280;
     this.canvas.height = 720;
-    // this.canvas.style = "padding: 5px; margin: auto; display: block; width: 1000px; height: 560px;";
     this.canvas.style = "padding: 5px; margin: auto; display: block; max-width: 100%; height: 100%";
     if(mobile){ 
-      this.canvas.style = "width: 100%";
-      this.canvas.style = "max-height: 100%";
-      document.getElementById("navigasjon").style = "position: absolute; font-size: 200%; top:200%; left: 10px; text-align: left;";
+      this.canvas.style = "max-height: 100%; width: 80%; margin-left: 10%";
+      document.getElementById("navigasjon").style = "position: absolute; font-size: 200%; left: 10px; text-align: left;";
     }
     else {
       document.getElementById("navigasjon").style = "position: absolute; top: 30; left: 10; text-align: center;"
     }
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.getElementById("spilldiv"));  
-    // Her settes spillcanvas inn før en div kalt spilldiv, slik at vi kan endre plasseringen av spillet på nettsiden
+    /* Her settes spillcanvas inn før en div kalt spilldiv, 
+     slik at vi kan endre plasseringen av spillet på nettsiden */
     this.frameNo = 0;
     
     if(startscrn){
@@ -338,7 +356,7 @@ function hudComponent(width, height, sprite, startX, startY) {
   this.x = startX
   this.y = startY
   this.sprSheet = sprite;
-  this.update = function(isHeld) { // function(isHeld) {
+  this.update = function(isHeld) { 
     var imgId = this.sprSheet
     if(isHeld)
     {
@@ -347,7 +365,6 @@ function hudComponent(width, height, sprite, startX, startY) {
     else{
       sx = 0
     }
-     // set to this.width to get hilit button sprite
     sy = 0 
     ctx.drawImage(document.getElementById(imgId), sx, sy,
 		  this.width, this.height, this.x, this.y,
@@ -595,8 +612,7 @@ function checkHiScore(thisscore) {
 
 function updateGameArea() { // one game turn
   if (gameArea.pause) {return;}
-  if (gameOver) { // kjøres ved game over, 1 gang
-    console.log("Game over med dist: "+runDist+" and score: "+curScore)
+  if (gameOver) { // kjøres ved game over
     gameArea.stop();
     if (jackpot) {
       curScore += jackpot;
@@ -677,7 +693,6 @@ function updateGameArea() { // one game turn
       collided = daxtrot;
     }
     if (collided) {
-      console.log("collide: "+collided.sprSheet)
       if (pup.sprSheet == "spikefruit_spr") {
         collided.buffy = 500;
         if (pup.superstrong) { collided.buffy = 800; }
@@ -833,7 +848,6 @@ function updateGameArea() { // one game turn
     }
     obs.update()
     if (obs.crashWith(daxtrot) && (!daxtrot.buffy) && (!obs.isDead)) {
-      console.log("Crash with "+obs.sprSheet)
       gameOver = true // handle i neste frame
     }
     else if(!obs.isDead &&
@@ -957,8 +971,7 @@ function butUp(keycode) {
   }
 }
 
-function butDown(keycode) {
-  // Her lagres verdi for om en knapp holdes nede - gjeninnførte for å bruke spriteupdate på knappene 10.11 -Petter
+function butDown(keycode) { // Knapp holdes nede
   if(victory) { return; }
   if(keycode == p1Key) {
     b1Held = true;
@@ -966,8 +979,6 @@ function butDown(keycode) {
   else if(keycode == p2Key) {
     b2Held = true;
   }
-
-  // if(mobile){butUp(keycode)}
 }
 
 // Hoppefunksjon, y-verdi, oppover
@@ -1005,7 +1016,6 @@ function openNav() {
 }
 
 function closeNav() {
-  console.log("he")
   document.getElementById("mySidenav").style.width = "0";
   gameArea.pause = false;
 }
@@ -1015,8 +1025,7 @@ function swapLang() {
   else if (lang=="no") { lang="en"; }
   window.location.search["lang"] = lang;
   var l = lang
-  fetchNavbar(l); // funker?
-  console.log("Pause status = "+gameArea.pause)
+  fetchNavbar(l); 
   if (!runDist) { // not currently playing a game
     window.location.href=("?lang="+lang); // reload page
   }
@@ -1050,20 +1059,11 @@ function touchHandle(){
         but2.update(true)
       }
   }
-
-  // Touchend event - dersom vi skulle trenge å holde inne knappene f.eks. siden de nå bare funker med 'tap'
   window.addEventListener('touchend', handleEndtouch, false);
   function handleEndtouch(evt){
     evt.preventDefault();
     posx = evt.changedTouches[0].clientX.toFixed(2);
     posy = evt.changedTouches[0].clientY.toFixed(2);
-    // if(evt.targetTouches.length == 0 and b1Held && b2Held) // begge slapp knappen, 
-    // {
-    //   butUp(p1Key)
-    //   but1.update(true)
-    //   butUp(p2Key)
-    //   but2.update(true)
-    // }
     if(posx<175 && posy<190 && b1Held) // P1 Hopp dersom Q klikkes
       {
         butUp(p1Key)
@@ -1076,31 +1076,6 @@ function touchHandle(){
       }
     show.innerHTML = "tend";
   }
-  /* Klikkevent for samme greia. Brukes ikke nå, men i fall vi ønsker å bruke senere lagrer jeg den her   
-  window.addEventListener('click', canvclick, false);
-  function canvclick(e) {    
-    var pos = getMousePos(gamecanvas, e);
-    posx = pos.x;
-    posy = pos.y;    
-    if(mobile){
-      if(posx>5 && posx<175 && posy<190 && posy>10)
-      {
-        butDown(p1Key)
-      }
-
-      if(posx>1100 && posx<1265 && posy<190 && posy>10)
-      {
-        butDown(p2Key)
-      }
-    }
-  } 
-  function getMousePos(canvas, evt) {
-    var rect = canvas.getBoundingClientRect();
-    return {
-        x: (evt.clientX - rect.left) / (rect.right - rect.left) * canvas.width,
-        y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
-    };
-  } */ 
 }
 
 var rockMap = {
@@ -1356,9 +1331,6 @@ function spawnVulture(y,x) {
   nuObs.centerY = y // circle this point
   nuObs.centerX = x // circle above this point
   nuObs.sverve = (rockbottom - 60 - y) / 4
-  // if (startY - nuObs.sverve < 10) {
-  //   nuObs.sverve = startY - 10;}
-  console.log(nuObs.centerX,"/",nuObs.centerY,nuObs.sverve);
   nuObs.speedX = -3
   nuObs.speedY = 1
   nuObs.diving = false; // if true, dive to catch a frog
@@ -1479,9 +1451,6 @@ function spawnVictory() {
 }
 var creditDuration = 0
 function rollCredits() {
-  // hitext = new txtComponent("40px", "Consolas", "orange",
-  //                           gameArea.canvas.width/2-220,
-  //                           gameArea.canvas.height/3);
   creditDuration ++
   rules.color = "orange";
   if (lang == "no") {
