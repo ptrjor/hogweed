@@ -349,6 +349,16 @@ canvas {
     visibility: hidden;
 }
 
+#trunk_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 176px;
+    width: 165px;
+    background-image: url(assets/trunk.png);
+    visibility: hidden;
+}
 #talltrunk_spr
 {
     position: absolute;
@@ -428,6 +438,16 @@ canvas {
     height: 31px;
     width: 58px;
     background-image: url(assets/fruit_spike.png);
+    visibility: hidden;
+}
+#branch_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 46px;
+    width: 76px;
+    background-image: url(assets/branch.png);
     visibility: hidden;
 }
 #spikebuff_spr
