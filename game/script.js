@@ -19,7 +19,6 @@ var pkeychange = 1;
 var startscrn = true;
 var startbtn, changeInputCmp;
 var hiScore = localStorage.getItem('hiScore'); // Lagrer en highscore i nettleserens lokallagring. Lagres mellom økter på samme maskin, men ikke mellom enheter eller forskjellige nettlesere.
-hiScore = 0
 var p1Key = localStorage.getItem('config_p1')
 var p2Key = localStorage.getItem('config_p2')
 if (!p1Key) { p1Key = "KeyQ"; }
@@ -1173,6 +1172,9 @@ var rockMap = {
     case 3000:
       spawnTreeCrown();
       break;
+    case 3190:
+      spawnVulture();
+      break;
     case 3280:
       spawnThorns();
       break;
@@ -1278,7 +1280,7 @@ var rockMap = {
       spawnBird(400);
       break;
     case 7425:
-      spawnBird(530);
+      spawnBird(550);
       break;
     case 7500:
       spawnBird(40);
