@@ -96,7 +96,6 @@ function startScreen(scr, newHscore) {
   }
   if(scr>0) // Game over skjerm. Kjøres dersom du nettopp tapte. Vises ikke om du nettopp lastet siden
   {
-    
     if(!mobile){ // Gjør at knappene ikke vises i menyen om man trykker på dem
     but1.width = 0;
     but1.height = 0;
@@ -109,7 +108,6 @@ function startScreen(scr, newHscore) {
     but1.update();
     but2.update();
     }
-    
     startbtn.y = gameArea.canvas.height / 2 + 100
     if(mobile){
       lastscore = new txtComponent("40px", "Consolas", "brown", gameArea.canvas.width/2-250, 130);
@@ -127,7 +125,8 @@ function startScreen(scr, newHscore) {
         hitext.text = "Try again, fail better!";
       }
     }
-    else if (lang=="no") {
+    else if (lang == "no") {
+      window.alert("go-skjerm SSSSS: "+scr);
       lastscore.text = "Daxtrot kræsja. Poeng: " + scr;
       startbtn.text = "Klikk for å spille igjen";
       
