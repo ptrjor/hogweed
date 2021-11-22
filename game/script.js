@@ -126,7 +126,6 @@ function startScreen(scr, newHscore) {
       }
     }
     else if (lang == "no") {
-      window.alert("go-skjerm SSSSS: "+scr);
       lastscore.text = "Daxtrot kræsja. Poeng: " + scr;
       startbtn.text = "Klikk for å spille igjen";
       
