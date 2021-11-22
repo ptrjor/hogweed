@@ -128,10 +128,8 @@ function startScreen(scr, newHscore) {
     else if (lang == "no") {
       lastscore.text = "Daxtrot kræsja. Poeng: " + scr;
       startbtn.text = "Klikk for å spille igjen";
-      
       lastscore.x = gameArea.canvas.width/2-270;
       startbtn.x = gameArea.canvas.width/2-250;
-      
       if (newHscore) {
         hitext.text = "Gratulerer med ny rekord!"
         hitext.color = "orange";}
@@ -894,7 +892,6 @@ function updateGameArea() { // one game turn
         obs.gotDestroyed();
         jackpot += 300; // +200 from gotDestroyed()
         victory = true;
-        console.log("Vant med "+curScore+" poeng og "+jackpot+" jackpot.")
       }
       else if (obs.dizzy) {
         obs.dizzy -= 1;
@@ -905,7 +902,6 @@ function updateGameArea() { // one game turn
       }
     }
     else if (obs.sprSheet == "boomerang_spr" && (!obs.isDead)) {
-      console.log("boomerang spped ",obs.speedX)
       obs.x += obs.speedX;
       if (obs.x > gameArea.canvas.width - 100) { // returned to Pogo
         garbageObs.push(obs);
