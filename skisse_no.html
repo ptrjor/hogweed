@@ -1,52 +1,62 @@
-    <div class="grid-item"><h4>Tidlig forslag til <i>Daxtrot</i></b>
-    <ul>
-      <li>Kooperativ, lokal multiplayer (spillbar på en nettside eller
-        lokalt, men på ett tastatur/en enhet). </li>
-      <li>Hver spiller har én knapp.</li>
-      <li>Run'n'jump hvor spillerne samarbeider om å styre et felles
-        skip/ridedyr gjennom et landskap med hindre.</li>
-      <li>Basert
-      på <a href="https://forums.tigsource.com/index.php?topic=13452">en
+<div class="grid-item"><h4>Tidlig forslag til <i>Daxtrot</i></b>
+<ul>
+  <li>Kooperativ, lokal multiplayer (spillbar på en nettside eller
+    lokalt, men på ett tastatur/en enhet). </li>
+  <li>Hver spiller har én knapp.</li>
+  <li>Run'n'jump hvor spillerne samarbeider om å styre et felles
+    skip/ridedyr gjennom et landskap med hindre.</li>
+  <li>Basert
+    på <a href="https://forums.tigsource.com/index.php?topic=13452">en
       tidligere ide</a> av miconazole.</li>
-    </ul> <br><br>
-    <img src="game/assets/IDE_skissebok.png"> 
-    <img src="game/assets/IDE_gameloop.gif" title="Game loop mockup"> <br><br>
-    <div class="grid-item"> Spillerne er for eksempel to frosker eller
-      andre småkryp som rir på en dachshund. De samarbeider om å lede
-      ridedyret og rytterne gjennom et farefullt landskap. Ridedyret
-      starter litt til venstre på skjermen og løper mot høyre, i samme
-      stil som Mario og liknende: spriten til ridedyret står stille på
-      skjermen mens landskapet scroller mot venstre.<br><br>
-
-      Det kommer hindre som spillerne kan hoppe over. For å få
-      ridedyret til å hoppe, må begge spillerne trykke på (slippe)
-      knappen sin samtidig. Basic hinder er type «hull i
-      bakken»: Spillerne må lære å trykke synkront for å hoppe over et
-      hinder. <br><br>
-
-      Hvis bare en spiller trykker sin knapp, hopper bare deres
-      avatar. Dette kan medføre kløneri når spillerne må taime
-      knappetrykket sitt for å hoppe med dyret. Men det kan også
-      brukes som avansert teknikk. Hvis første level er en skog, kan
-      det for eksempel være grener på trærne med frukt som
-      enkeltspillerne kan hoppe opp til og ta. Andre grener kan være
-      akkurat så høye at dyret ikke kan hoppe over dem, men at
-      spillerne er nødt til å hoppe i utakt, over grenen mens de lar
-      ridedyret løpe under. <br><br>
-
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/c/cf/Trot_animated.gif"
-        width="40%">
-      <img src="assets/IDE_walk.gif" width="40%">
-      <p>Det trengs litt enkel fysikk: Legemer har velositet i
-      retningene x og y; registrer om to legemer kræsjer; spillet
-      kjører som en løkke while (true) {…}; der hver iterasjon i
-      løkken er en frame i spillet. Game over er når ridedyret
-      kræsjer, tråkker ned i et avgrunn eller på annen måte settes ut
-      av spill. Men ha gjerne regler for slikt som at en av (eller
-      begge) spillerne kan falle av dyret og må hoppe opp på
-      hesteryggen igjen før spillerne får tilbake full
-      kontroll. Spillerne kan kanskje også holde nede knappen for å
-      forandre løpehastigheten til dyret. (Tenk:
-      hestens <a href="https://no.wikipedia.org/wiki/Gangart">gangarter
-      skritt, trav og gallop</a>.)</p>
+</ul>
+</div>
+<div class="grid-item">
+  <img src="game/assets/IDE_skissebok.png" title="Fra notatboka"
+       style="width:80%;">
+</div>
+<div class="grid-item"> Spillerne er for eksempel to frosker eller
+  andre småkryp som rir på en dachshund. De samarbeider om å lede
+  ridedyret og rytterne gjennom et farefullt landskap. Ridedyret
+  starter litt til venstre på skjermen og løper mot høyre, i samme
+  stil som Mario og liknende: spriten til ridedyret står stille på
+  skjermen mens landskapet scroller mot venstre.<br><br>
+  
+  Det kommer hindre som spillerne kan hoppe over. For å få
+  ridedyret til å hoppe, må begge spillerne trykke på (slippe)
+  knappen sin samtidig. Basic hinder er type «hull i
+  bakken»: Spillerne må lære å trykke synkront for å hoppe over et
+  hinder. <br><br>
+  
+  Hvis bare en spiller trykker sin knapp, hopper bare deres
+  avatar. Dette kan medføre kløneri når spillerne må taime
+  knappetrykket sitt for å hoppe med dyret. Men det kan også
+  brukes som avansert teknikk. Hvis første level er en skog, kan
+  det for eksempel være grener på trærne med frukt som
+  enkeltspillerne kan hoppe opp til og ta. Andre grener kan være
+  akkurat så høye at dyret ikke kan hoppe over dem, men at
+  spillerne er nødt til å hoppe i utakt, over grenen mens de lar
+  ridedyret løpe under.
+</div>
+<div class="grid-item">
+  <img src="game/assets/IDE_gameloop.gif" title="Game loop mockup" style="width:80%;">
+</div>
+<div class="grid-item">
+  <img
+    src="https://upload.wikimedia.org/wikipedia/commons/c/cf/Trot_animated.gif"
+    style="width:45%;">
+    <img src="game/assets/IDE_walk.gif" style="width:45%;">
+</div>  
+<div class="grid-item">
+  Det trengs litt enkel fysikk: Legemer har velositet i
+  retningene x og y; registrer om to legemer kræsjer; spillet
+  kjører som en løkke while (true) {…}; der hver iterasjon i
+  løkken er en frame i spillet. Game over er når ridedyret
+  kræsjer, tråkker ned i et avgrunn eller på annen måte settes ut
+  av spill. Men ha gjerne regler for slikt som at en av (eller
+  begge) spillerne kan falle av dyret og må hoppe opp på
+  hesteryggen igjen før spillerne får tilbake full
+  kontroll. Spillerne kan kanskje også holde nede knappen for å
+  forandre løpehastigheten til dyret. (Tenk:
+  hestens <a href="https://no.wikipedia.org/wiki/Gangart">gangarter:
+  skritt, trav og gallop</a>.)
+</div>
