@@ -97,12 +97,12 @@ function startScreen(scr, newHscore) {
   if(scr>0) // Game over skjerm. Kjøres dersom du nettopp tapte. Vises ikke om du nettopp lastet siden
   {
     if(!mobile){ // Gjør at knappene ikke vises i menyen om man trykker på dem
-    but1.width = 0;
-    but1.height = 0;
-    but2.width = 0;
-    but2.height = 0;
-    but1key.width = "0px";
-    but2key.width = "0px";
+    but1.width = 1;
+    but1.height = 1;
+    but2.width = 1;
+    but2.height = 1;
+    but1key.width = "1px";
+    but2key.width = "1px";
     but2key.update();
     but1key.update();
     but1.update();
