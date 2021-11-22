@@ -390,6 +390,26 @@ canvas {
     background-image: url(assets/button2.png);
     visibility: hidden;
 }
+#pogo_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 144px;
+    width: 84px;
+    background-image: url(assets/pogo.png);
+    visibility: hidden;
+}
+#boomerang_spr
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 28px;
+    width: 28px;
+    background-image: url(assets/boomerang.png);
+    visibility: hidden;
+}
 #bones_spr
 {
     position: absolute;
