@@ -32,7 +32,6 @@ if (!lang) { lang = "no"; }
 
 function startScreen(scr, newHscore) {    
   if(screen.width<450){
-    alert("Screen width: " + screen.width + ". Vis denne til Petter :)")
     if (lang == "en") {
       document.getElementById("spilldiv").innerHTML = "Rotate screen and refresh, then zoom out to play.";
     }
@@ -47,7 +46,6 @@ function startScreen(scr, newHscore) {
     scrh = screen.height -10
     mobile = true;
    } // Dette betyr at det sannsynligvis er en rotert mobilskjerm
-
   startscrn = true;
   obstacles = []; garbageObs = [];
   collectibles = []; garbageCol = [];
