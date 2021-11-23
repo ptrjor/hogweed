@@ -43,7 +43,10 @@ function startScreen(scr, newHscore) {
   } else if(screen.width>450 && screen.width<922){
     scrh = screen.height -10
     mobile = true;
-  } else {alert("Screen width: " + screen.width + ". Vis denne til Petter :)")}// Dette betyr at det sannsynligvis er en rotert mobilskjerm
+  } else if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+    scrh = screen.height -10
+    mobile = true;
+   } // Dette betyr at det sannsynligvis er en rotert mobilskjerm
 
   startscrn = true;
   obstacles = []; garbageObs = [];
@@ -1159,7 +1162,6 @@ function touchHandle(){
         butUp(p2Key)
         but2.update(true);
       }
-    show.innerHTML = "tend";
   }
 }
 
