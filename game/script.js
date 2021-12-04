@@ -1,3 +1,28 @@
+// CHANGES (X) OG TODO ( ) :
+//
+// (X) eternal death bug (hvis dax krasja med bomerangen til boss pogo når
+//     (victory == true), game over. hakka daxtrot.buffy for å unngå)
+// (x) Tweaked boss fight
+//   (x) throws boomerangs at slightly lower rate
+//   (x) boomerang speed and knockback in x-direction
+//   (x) increased dizziness window
+// (X) difficulty tweaks
+//   (X) kvist-scenener (runDist 3460 og 4700), finstill distanser
+//     (X) første scene litt mer stringent, andre scene mer avstand til gribb
+//   ( ) fugleflokken rett før boss: gjør enklere, eller ok?
+// ( ) add wizard mode? (runDist = N || daxtrot.buffy = 1000000 )
+// ( ) music and sound, eg. dax (jump, crash), frog (jump),
+//     obstacle (destroy), bird (push), vulture (dive, grab),
+//     branch (push), pogo (bounce, taunt animation)
+// ( ) nettsida
+//   ( ) hogweed_en.html "Petter […] have spent" -> "has spent"
+//   ( ) lag enkel presentasjon og publiser på itch.io?
+//     ( ) kort manual pluss presentasjon over fiender/hindre
+// ( ) startskjerm
+//   ( ) tillat å starte ved å trykke spillerknapper (en eller begge)
+//   ( ) BUG: hvis man klikker "Endre spillknapper", lett å forlate musa og 
+//       ende i samme klikkområde når man vil "[klikke] for å spille" etterpå
+
 var daxtrot, p1, p2, ground, bg;
 var myScore, hiscorecomponent, hscorecolor;
 var rockbottom;
@@ -53,6 +78,8 @@ function startScreen(scr, newHscore) {
   curScore = 0;
   runDist = 0;
   curCollected = [];
+  spawnedBoss = false;
+  victory = false;
   jackpot = 0 // give bonus points here (eg. for collecting treasure)
 
   gameArea.start(startscrn);
@@ -562,7 +589,7 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
       ctx.drawImage(document.getElementById(this.sprSheet),sx,sy,
 		    this.width,this.height,this.x,this.y,
 		    this.width,this.height);
-      if (this.buffy && gameArea.frameNo % 20 < 10) { // blinking icon
+      if (this.buffy && gameArea.frameNo % 20 < 10 && (!victory)) { // blinking icon
         var icoX = (this.x + this.width) - 24
         var icoY = this.y - 24
         ctx.drawImage(document.getElementById("spikebuff_spr"),icoX,icoY);
@@ -576,7 +603,9 @@ function sprComponent(width, height, sprite, collidebuffer, framelen,
   }
 
   this.gotDestroyed = function() { // call when obstacles get knocked out
-    jackpot += 200;
+    if (!victory) {
+      jackpot += 100;
+    }
     this.isDead = true;
     this.throttleAnim = true;
     this.speedX = 5;
@@ -841,6 +870,7 @@ function updateGameArea() { // one game turn
       }
     }
     else if(obs.sprSheet == "pogo_spr" && (!obs.isDead)) {
+      // boss fight
       if (obs.x < gameArea.canvas.width - obs.width * 2) {
         obs.x+=3; } // cancel horizontal scrolling
       if (obs.onGround()) {
@@ -850,29 +880,31 @@ function updateGameArea() { // one game turn
       obs.speedY += 0.5;
       if (obs.anger > 0 && (!obs.dizzy)) { // timer between boomerang throws
         obs.anger -= 1;
-        if (obs.anger < 1) { // start to throw boomerang now
-          obs.sprReel = 1;
+        if (obs.anger < 1) { 
+          obs.sprReel = 1; // start taunt animation
           obs.sprFrame = 0;
         };
       }
-      else if (obs.sprReel == 1 && obs.sprFrame == 5) {
-        obs.sprReel = 2;
+      else if (obs.sprReel == 1 && obs.sprFrame == 5) { 
+        // finished taunt animation
+        obs.sprReel = 2; // start throw animation
         obs.sprFrame = 0;
       }
       else if (obs.sprReel == 2 && obs.sprFrame == 5) {
+        // finished throw animation; spawn boomerang
         let x = obs.x - 24
-        let y = rockbottom - 90 // frog height
+        let y = rockbottom - 90 // start at frog height
         boomerang = new sprComponent(28, 28, "boomerang_spr", 4, 4, x, y);
-        boomerang.speedX = -3;
+        boomerang.speedX = -4;
         boomerang.hovering = 0;
         obstacles.push(boomerang)
         obs.sprReel = 0;
         obs.sprFrame = 0;
-        obs.anger = Math.floor(Math.random() * 250) + 250;
+        obs.anger = Math.floor(Math.random() * 200) + 400; // reset throw timer
       }
       if (obs.crashWith(player1)) {
-        obs.dizzy += 30;
-        player1.speedX = -6;
+        obs.dizzy += 60;
+        player1.speedX = -7;
         player1.speedY = -6;
         // shift player pos to avoid double collisions (instakill)
         player1.x = obs.x - player1.width ;
@@ -880,24 +912,25 @@ function updateGameArea() { // one game turn
         obs.sprReel = 3;
       }
       if (obs.crashWith(player2)) {
-        obs.dizzy += 30;
-        player2.speedX = -6;
+        obs.dizzy += 60;
+        player2.speedX = -7;
         player2.speedY = -6;
         // shift player pos to avoid double collisions (instakill)
         player2.x = obs.x - player2.width ;
         player2.y -=6 ;
         obs.sprReel = 3;
       }
-      if (obs.dizzy > 30) { // got double-jumped
+      if (obs.dizzy > 60) { // got double-jumped
         obs.gotDestroyed();
-        jackpot += 300; // +200 from gotDestroyed()
+        jackpot += 300; // in addition to 100 points in gotDestroyed()
+        daxtrot.buffy = 1000 // dont die from boomerang
         victory = true;
       }
       else if (obs.dizzy) {
         obs.dizzy -= 1;
         if (obs.dizzy < 1) {
           obs.sprReel = 0;
-          obs.anger = Math.floor(Math.random() * 100) + 60;
+          obs.anger = Math.floor(Math.random() * 200) + 200;
         }
       }
     }
@@ -922,11 +955,11 @@ function updateGameArea() { // one game turn
       }
       if (obs.crashWith(player1)) {
         player1.speedY = -6;
-        player1.speedX = -3;
+        player1.speedX = -4;
       }
       if (obs.crashWith(player2)) {
         player2.speedY = -6;
-        player2.speedX = -3;
+        player2.speedX = -4;
       }
     }
     if (obs.x < - obs.width * 2 || obs.y > gameArea.canvas.height) {
@@ -1237,13 +1270,13 @@ var rockMap = {
     case 3280:
       spawnThorns();
       break;
-    case 3450:
+    case 3460:
       spawnThorns();
       break;
     case 3760:
       spawnBranchTree()
       break;
-    case 3940:
+    case 3935:
       spawnThorns()
       break;
     case 4300:
@@ -1253,7 +1286,7 @@ var rockMap = {
     case 4550:
       spawnThorns();
       break;
-    case 4700:
+    case 4690:
       spawnVulture(50)
       break;
     case 4750:
@@ -1262,7 +1295,7 @@ var rockMap = {
     case 4900:
       spawnTree();
       break;
-    case 5000:
+    case 4995:
       spawnHinder();
       break;
     case 5350:
